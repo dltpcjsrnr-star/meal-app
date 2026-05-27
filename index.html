@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오늘의 식단</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F4EF;
+    --card: #FFFFFF;
+    --primary: #2D5016;
+    --primary-light: #4A7C2F;
+    --accent: #E8732A;
+    --accent-light: #FDF0E8;
+    --text: #1A1A1A;
+    --text-muted: #6B6B6B;
+    --border: #E8E3DA;
+    --breakfast: #3B82F6;
+    --lunch: #E8732A;
+    --dinner: #7C3AED;
+    --tag-bg: #F0EDE8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 2rem;
+  }
+
+  /* Header */
+  .header {
+    background: var(--primary);
+    color: white;
+    padding: 1.25rem 1.25rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+  .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+  .header .subtitle { font-size: 12px; opacity: 0.7; margin-top: 2px; }
+  .live-time {
+    font-size: 13px;
+    background: rgba(255,255,255,0.15);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  /* Meal type tabs */
+  .meal-tabs {
+    display: flex;
+    gap: 8px;
+  }
+  .meal-tab {
+    flex: 1;
+    padding: 8px 4px;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.65);
+    transition: all 0.2s;
+  }
+  .meal-tab.active { background: white; color: var(--primary); }
+  .meal-tab .tab-icon { display: block; font-size: 16px; margin-bottom: 2px; }
+
+  /* Day selector */
+  .day-bar {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 0 0.75rem;
+  }
+  .day-bar::-webkit-scrollbar { display: none; }
+  .day-btn {
+    flex-shrink: 0;
+    padding: 12px 14px;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .day-btn .day-name { display: block; font-weight: 700; font-size: 14px; }
+  .day-btn .day-date { display: block; font-size: 11px; margin-top: 1px; }
+  .day-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .day-btn.today .day-name::after {
+    content: '';
+    display: inline-block;
+    width: 4px; height: 4px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+
+  /* Content */
+  .content { padding: 1rem; }
+
+  .meal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+  .meal-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .badge-breakfast { background: #EFF6FF; color: var(--breakfast); }
+  .badge-lunch { background: var(--accent-light); color: var(--accent); }
+  .badge-dinner { background: #F5F3FF; color: var(--dinner); }
+
+  /* Main dish */
+  .main-dish-card {
+    background: var(--primary);
+    color: white;
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-bottom: 0.75rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .main-dish-card::before {
+    content: '';
+    position: absolute;
+    right: -20px; top: -20px;
+    width: 100px; height: 100px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+  .main-label { font-size: 11px; opacity: 0.65; font-weight: 500; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .main-name { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .main-origin { font-size: 12px; opacity: 0.6; }
+
+  /* Plus corner */
+  .plus-card {
+    background: #F0FAF0;
+    border: 1px solid #BBE3BB;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 0.75rem;
+    font-size: 13px;
+    color: #2D6A2D;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Sides */
+  .sides-title { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.03em; }
+  .sides-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .side-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .side-item.kimchi {
+    border-left: 3px solid var(--accent);
+  }
+
+  /* No data */
+  .no-data {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+  }
+  .no-data .emoji { font-size: 40px; margin-bottom: 1rem; }
+  .no-data h3 { font-size: 16px; font-weight: 500; margin-bottom: 0.5rem; }
+  .no-data p { font-size: 13px; line-height: 1.6; }
+
+  /* Update info */
+  .update-info {
+    margin: 1rem;
+    background: var(--tag-bg);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+  .update-info a {
+    color: var(--primary-light);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  /* Loading */
+  .loading { text-align: center; padding: 3rem; color: var(--text-muted); }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>🍽 이번 주 식단</h1>
+      <div class="subtitle" id="headerDate">불러오는 중...</div>
+    </div>
+    <div class="live-time" id="liveTime">--:--</div>
+  </div>
+  <div class="meal-tabs">
+    <button class="meal-tab" id="tab-breakfast" onclick="setMeal('breakfast')">
+      <span class="tab-icon">🌅</span>조식
+    </button>
+    <button class="meal-tab" id="tab-lunch" onclick="setMeal('lunch')">
+      <span class="tab-icon">☀️</span>중식
+    </button>
+    <button class="meal-tab" id="tab-dinner" onclick="setMeal('dinner')">
+      <span class="tab-icon">🌙</span>석식
+    </button>
+  </div>
+</div>
+
+<div class="day-bar" id="dayBar"></div>
+
+<div id="mainContent">
+  <div class="loading">
+    <div class="spinner"></div>
+    <div>식단 정보를 불러오는 중...</div>
+  </div>
+</div>
+
+<div class="update-info">
+  식단표가 바뀌었나요? <a href="admin.html">관리자 페이지</a>에서 업데이트하세요
+</div>
+
+<script>
+const STORAGE_KEY = 'mealplan_data';
+const WEEK_KEY = 'mealplan_week';
+
+const DAY_NAMES = ['일','월','화','수','목','금','토'];
+const MEAL_MAP = { breakfast: '조식', lunch: '중식', dinner: '석식' };
+
+let menuData = null;
+let selectedDay = null;
+let selectedMeal = 'lunch';
+
+function getMealByHour(h) {
+  if (h < 10) return 'breakfast';
+  if (h < 15) return 'lunch';
+  return 'dinner';
+}
+
+function getTodayKey() {
+  const d = new Date();
+  return DAY_NAMES[d.getDay()];
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('liveTime').textContent =
+    now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('headerDate').textContent =
+    now.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
+}
+
+function setMeal(meal) {
+  selectedMeal = meal;
+  document.querySelectorAll('.meal-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + meal).classList.add('active');
+  renderContent();
+}
+
+function setDay(dayKey) {
+  selectedDay = dayKey;
+  document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('daybtn-' + dayKey);
+  if (btn) { btn.classList.add('active'); btn.scrollIntoView({ inline: 'center', behavior: 'smooth' }); }
+  renderContent();
+}
+
+function buildDayBar(days) {
+  const bar = document.getElementById('dayBar');
+  bar.innerHTML = '';
+  const todayName = getTodayKey();
+  days.forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = 'day-btn' + (d.key === todayName ? ' today' : '');
+    btn.id = 'daybtn-' + d.key;
+    btn.innerHTML = `<span class="day-name">${d.key}</span><span class="day-date">${d.date || ''}</span>`;
+    btn.onclick = () => setDay(d.key);
+    bar.appendChild(btn);
+  });
+}
+
+function renderContent() {
+  const content = document.getElementById('mainContent');
+  if (!menuData || !menuData.days) {
+    content.innerHTML = `<div class="no-data"><div class="emoji">📋</div><h3>식단 정보가 없습니다</h3><p>관리자 페이지에서 식단표 이미지를 업로드해주세요.</p></div>`;
+    return;
+  }
+
+  const dayData = menuData.days.find(d => d.key === selectedDay);
+  if (!dayData) { content.innerHTML = `<div class="no-data"><div class="emoji">📅</div><h3>해당 날짜 정보 없음</h3></div>`; return; }
+
+  const mealKor = MEAL_MAP[selectedMeal];
+  const meal = dayData[mealKor];
+  if (!meal) { content.innerHTML = `<div class="no-data"><div class="emoji">🚫</div><h3>해당 식사 정보가 없습니다</h3></div>`; return; }
+
+  const badgeClass = { breakfast: 'badge-breakfast', lunch: 'badge-lunch', dinner: 'badge-dinner' }[selectedMeal];
+  const badgeIcon = { breakfast: '🌅', lunch: '☀️', dinner: '🌙' }[selectedMeal];
+
+  const plusHTML = meal.plus ? `<div class="plus-card">➕ <strong>PLUS 코너:</strong> ${meal.plus}</div>` : '';
+
+  const sidesHTML = (meal.sides || []).map(s => {
+    const isKimchi = /김치|깍두기|석박지|열무/.test(s);
+    return `<div class="side-item${isKimchi ? ' kimchi' : ''}">${s}</div>`;
+  }).join('');
+
+  content.innerHTML = `
+    <div class="content">
+      <div class="meal-header">
+        <div class="meal-type-badge ${badgeClass}">${badgeIcon} ${mealKor}</div>
+      </div>
+      <div class="main-dish-card">
+        <div class="main-label">메인 요리</div>
+        <div class="main-name">${meal.main || '-'}</div>
+        ${meal.origin ? `<div class="main-origin">원산지: ${meal.origin}</div>` : ''}
+      </div>
+      ${plusHTML}
+      <div class="sides-title">반찬</div>
+      <div class="sides-grid">${sidesHTML}</div>
+    </div>
+  `;
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) menuData = JSON.parse(raw);
+  } catch(e) { menuData = null; }
+
+  const now = new Date();
+  const todayKey = getTodayKey();
+  selectedMeal = getMealByHour(now.getHours());
+
+  if (menuData && menuData.days && menuData.days.length > 0) {
+    buildDayBar(menuData.days);
+    const todayExists = menuData.days.find(d => d.key === todayKey);
+    selectedDay = todayExists ? todayKey : menuData.days[0].key;
+  } else {
+    selectedDay = todayKey;
+  }
+
+  setMeal(selectedMeal);
+  setDay(selectedDay);
+}
+
+updateClock();
+setInterval(updateClock, 10000);
+loadData();
+</script>
+</body>
+</html>

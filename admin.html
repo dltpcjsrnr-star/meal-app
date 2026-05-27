@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>식단 관리자</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F4EF;
+    --card: #FFFFFF;
+    --primary: #2D5016;
+    --accent: #E8732A;
+    --text: #1A1A1A;
+    --text-muted: #6B6B6B;
+    --border: #E8E3DA;
+    --success: #16A34A;
+    --error: #DC2626;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 3rem; }
+
+  .header {
+    background: var(--primary);
+    color: white;
+    padding: 1.25rem;
+  }
+  .header h1 { font-size: 18px; font-weight: 700; }
+  .header p { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+
+  .section { margin: 1rem; }
+  .card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+  }
+  .card-title { font-size: 14px; font-weight: 700; margin-bottom: 1rem; color: var(--primary); }
+
+  /* API Key */
+  .api-row { display: flex; gap: 8px; }
+  .api-input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    background: var(--bg);
+  }
+  .api-input:focus { outline: none; border-color: var(--primary); }
+  .btn-save-key {
+    padding: 10px 16px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .key-status { font-size: 12px; margin-top: 8px; }
+  .key-status.ok { color: var(--success); }
+  .key-status.err { color: var(--error); }
+
+  /* Upload */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg);
+  }
+  .upload-zone:hover, .upload-zone.dragover { border-color: var(--primary); background: #F0F7EA; }
+  .upload-zone .icon { font-size: 36px; margin-bottom: 0.75rem; }
+  .upload-zone p { font-size: 14px; color: var(--text-muted); }
+  .upload-zone .hint { font-size: 12px; margin-top: 6px; color: var(--text-muted); opacity: 0.7; }
+  #fileInput { display: none; }
+
+  .preview-img {
+    width: 100%;
+    border-radius: 10px;
+    margin-top: 1rem;
+    border: 1px solid var(--border);
+  }
+
+  .btn-analyze {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 14px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-analyze:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Status */
+  .status-box {
+    margin-top: 1rem;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+    display: none;
+  }
+  .status-box.loading { background: #EFF6FF; color: #1D4ED8; display: block; }
+  .status-box.success { background: #F0FDF4; color: var(--success); display: block; }
+  .status-box.error { background: #FEF2F2; color: var(--error); display: block; }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #1D4ED8;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  /* Result preview */
+  .result-preview {
+    margin-top: 1rem;
+    display: none;
+  }
+  .result-preview.show { display: block; }
+  .result-day {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    border: 1px solid var(--border);
+  }
+  .result-day strong { color: var(--primary); }
+
+  .btn-publish {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 1rem;
+    display: none;
+  }
+  .btn-publish.show { display: block; }
+
+  .back-link {
+    display: block;
+    text-align: center;
+    margin: 1rem;
+    color: var(--text-muted);
+    font-size: 13px;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>⚙️ 식단 관리자</h1>
+  <p>식단표 이미지를 업로드하면 자동으로 분석합니다</p>
+</div>
+
+<!-- API Key -->
+<div class="section">
+  <div class="card">
+    <div class="card-title">🔑 Anthropic API 키</div>
+    <div class="api-row">
+      <input type="password" class="api-input" id="apiKeyInput" placeholder="sk-ant-..." />
+      <button class="btn-save-key" onclick="saveKey()">저장</button>
+    </div>
+    <div class="key-status" id="keyStatus"></div>
+  </div>
+</div>
+
+<!-- Upload -->
+<div class="section">
+  <div class="card">
+    <div class="card-title">📸 식단표 이미지 업로드</div>
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()"
+         ondragover="onDragOver(event)" ondrop="onDrop(event)" ondragleave="onDragLeave()">
+      <div class="icon">📋</div>
+      <p>식단표 이미지를 탭하거나<br>여기에 끌어다 놓으세요</p>
+      <div class="hint">JPG, PNG, WebP 지원</div>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" onchange="onFileSelect(event)">
+    <img id="previewImg" class="preview-img" style="display:none">
+    <button class="btn-analyze" id="analyzeBtn" onclick="analyzeImage()" disabled>
+      🔍 Claude AI로 메뉴 분석하기
+    </button>
+    <div class="status-box" id="statusBox"></div>
+    <div class="progress-bar" id="progressBar" style="display:none">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Result -->
+<div class="section">
+  <div class="card result-preview" id="resultPreview">
+    <div class="card-title">✅ 분석 결과 미리보기</div>
+    <div id="resultContent"></div>
+    <button class="btn-publish" id="publishBtn" onclick="publishData()">
+      📢 식단 업데이트 적용하기
+    </button>
+  </div>
+</div>
+
+<a href="index.html" class="back-link">← 식단 보기로 돌아가기</a>
+
+<script>
+let selectedFile = null;
+let parsedData = null;
+
+// Load saved API key
+window.onload = () => {
+  const key = localStorage.getItem('anthropic_api_key');
+  if (key) {
+    document.getElementById('apiKeyInput').value = key;
+    document.getElementById('keyStatus').textContent = '✓ API 키가 저장되어 있습니다';
+    document.getElementById('keyStatus').className = 'key-status ok';
+  }
+};
+
+function saveKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-ant-')) {
+    document.getElementById('keyStatus').textContent = '올바른 API 키 형식이 아닙니다 (sk-ant-로 시작해야 함)';
+    document.getElementById('keyStatus').className = 'key-status err';
+    return;
+  }
+  localStorage.setItem('anthropic_api_key', key);
+  document.getElementById('keyStatus').textContent = '✓ 저장되었습니다';
+  document.getElementById('keyStatus').className = 'key-status ok';
+}
+
+function onDragOver(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('dragover'); }
+function onDragLeave() { document.getElementById('uploadZone').classList.remove('dragover'); }
+function onDrop(e) {
+  e.preventDefault();
+  onDragLeave();
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) setFile(file);
+}
+function onFileSelect(e) { if (e.target.files[0]) setFile(e.target.files[0]); }
+
+function setFile(file) {
+  selectedFile = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = document.getElementById('previewImg');
+    img.src = e.target.result;
+    img.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+  document.getElementById('analyzeBtn').disabled = false;
+  document.getElementById('uploadZone').querySelector('p').textContent = file.name;
+}
+
+function setStatus(type, msg) {
+  const box = document.getElementById('statusBox');
+  box.className = 'status-box ' + type;
+  box.textContent = msg;
+}
+
+function setProgress(pct) {
+  const bar = document.getElementById('progressBar');
+  bar.style.display = pct > 0 ? 'block' : 'none';
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+async function analyzeImage() {
+  const apiKey = localStorage.getItem('anthropic_api_key');
+  if (!apiKey) { setStatus('error', '먼저 API 키를 저장해주세요.'); return; }
+  if (!selectedFile) { setStatus('error', '이미지를 선택해주세요.'); return; }
+
+  document.getElementById('analyzeBtn').disabled = true;
+  setStatus('loading', '이미지를 분석하는 중입니다... (10~30초 소요)');
+  setProgress(20);
+
+  const base64 = await fileToBase64(selectedFile);
+  setProgress(40);
+
+  const prompt = `이 식단표 이미지를 분석해서 아래 JSON 형식으로만 응답해줘. 다른 텍스트 없이 JSON만.
+
+{
+  "week": "YYYY-MM-DD ~ YYYY-MM-DD (해당주)",
+  "days": [
+    {
+      "key": "월|화|수|목|금|토|일",
+      "date": "MM월 DD일",
+      "조식": {
+        "main": "메인 요리명",
+        "origin": "원산지 정보",
+        "sides": ["반찬1", "반찬2", "..."],
+        "plus": "PLUS 코너 내용 (없으면 null)"
+      },
+      "중식": { ... 동일 구조 ... },
+      "석식": { ... 동일 구조 ... }
+    }
+  ]
+}
+
+주의사항:
+- 요일별로 A/B 라인이 있으면 별도 항목으로 분리 (key: "화A", "화B")
+- 메뉴가 없는 시간대는 null
+- 원산지 정보가 있으면 포함, 없으면 빈 문자열
+- JSON만 반환, 마크다운 코드블록 없이`;
+
+  try {
+    setProgress(60);
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-calls': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: selectedFile.type, data: base64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+
+    setProgress(85);
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.error?.message || 'API 오류');
+    }
+
+    const data = await resp.json();
+    const text = data.content.map(c => c.text || '').join('');
+    const clean = text.replace(/```json|```/g, '').trim();
+    parsedData = JSON.parse(clean);
+
+    setProgress(100);
+    setStatus('success', `✓ 분석 완료! ${parsedData.days?.length || 0}개 날짜의 식단을 인식했습니다.`);
+    showResult(parsedData);
+
+  } catch(e) {
+    setStatus('error', '오류: ' + e.message);
+    setProgress(0);
+    document.getElementById('analyzeBtn').disabled = false;
+  }
+}
+
+function showResult(data) {
+  const preview = document.getElementById('resultPreview');
+  const content = document.getElementById('resultContent');
+  preview.classList.add('show');
+
+  const html = (data.days || []).map(d => {
+    const meals = ['조식','중식','석식'].filter(m => d[m]).map(m => {
+      const meal = d[m];
+      return `${m}: ${meal.main || '-'}`;
+    }).join(' | ');
+    return `<div class="result-day"><strong>${d.key} (${d.date})</strong><br>${meals}</div>`;
+  }).join('');
+
+  content.innerHTML = html;
+  document.getElementById('publishBtn').classList.add('show');
+  setProgress(0);
+}
+
+function publishData() {
+  if (!parsedData) return;
+  localStorage.setItem('mealplan_data', JSON.stringify(parsedData));
+  localStorage.setItem('mealplan_week', new Date().toISOString());
+  alert('✅ 식단이 업데이트되었습니다!\n\n이제 index.html에서 새 식단을 확인할 수 있습니다.');
+  window.location.href = 'index.html';
+}
+
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = () => rej(new Error('파일 읽기 실패'));
+    r.readAsDataURL(file);
+  });
+}
+</script>
+</body>
+</html>
