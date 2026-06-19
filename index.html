@@ -1,1 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오늘의 식단</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F4EF; --card: #fff; --primary: #2D5016; --primary-light: #4A7C2F;
+    --accent: #E8732A; --accent-light: #FDF0E8; --text: #1A1A1A; --muted: #6B6B6B;
+    --border: #E8E3DA; --blue: #3B82F6; --purple: #7C3AED;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 3rem; }
 
+  /* Header */
+  .header { background: var(--primary); color: white; padding: 1.25rem 1.25rem 1.5rem; position: sticky; top: 0; z-index: 10; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header .sub { font-size: 12px; opacity: 0.65; margin-top: 3px; }
+  .live-time { font-size: 13px; background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; }
+
+  /* Meal tabs */
+  .meal-tabs { display: flex; gap: 8px; }
+  .meal-tab { flex: 1; padding: 8px 4px; border: none; border-radius: 10px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.6); transition: all 0.2s; }
+  .meal-tab.active { background: white; color: var(--primary); }
+  .meal-tab span { display: block; font-size: 16px; margin-bottom: 2px; }
+
+  /* Day bar */
+  .day-bar { background: white; border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; scrollbar-width: none; padding: 0 0.75rem; }
+  .day-bar::-webkit-scrollbar { display: none; }
+  .day-btn { flex-shrink: 0; padding: 12px 14px; border: none; background: none; font-family: inherit; font-size: 13px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .day-btn b { display: block; font-size: 15px; font-weight: 700; }
+  .day-btn small { display: block; font-size: 11px; margin-top: 1px; }
+  .day-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .day-btn.today b::after { content: ''; display: inline-block; width: 4px; height: 4px; background: var(--accent); border-radius: 50%; margin-left: 4px; vertical-align: middle; }
+
+  /* Content */
+  .content { padding: 1rem; }
+
+  .main-card { background: var(--primary); color: white; border-radius: 16px; padding: 1.25rem; margin-bottom: 0.75rem; position: relative; overflow: hidden; }
+  .main-card::before { content: ''; position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.06); border-radius: 50%; }
+  .main-label { font-size: 11px; opacity: 0.6; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .main-name { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .main-origin { font-size: 12px; opacity: 0.55; }
+  .meal-badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 1rem; }
+  .badge-b { background: #EFF6FF; color: var(--blue); }
+  .badge-l { background: var(--accent-light); color: var(--accent); }
+  .badge-d { background: #F5F3FF; color: var(--purple); }
+
+  .plus-card { background: #F0FAF0; border: 1px solid #BBE3BB; border-radius: 12px; padding: 10px 14px; margin-bottom: 0.75rem; font-size: 13px; color: #2D6A2D; }
+  .sides-label { font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
+  .sides-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .side-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.4; }
+  .side-item.k { border-left: 3px solid var(--accent); }
+
+  /* States */
+  .loading { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+  .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .no-data { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+  .no-data .emoji { font-size: 40px; margin-bottom: 1rem; }
+  .no-data h3 { font-size: 16px; font-weight: 500; margin-bottom: 0.5rem; }
+  .no-data p { font-size: 13px; line-height: 1.6; }
+
+  .footer { text-align: center; padding: 1rem; font-size: 12px; color: var(--muted); }
+  .footer a { color: var(--primary-light); text-decoration: none; font-weight: 500; }
+
+  /* Setup modal */
+  .setup-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
+  .setup-box { background: white; border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 360px; }
+  .setup-box h2 { font-size: 16px; font-weight: 700; margin-bottom: 0.5rem; color: var(--primary); }
+  .setup-box p { font-size: 13px; color: var(--muted); margin-bottom: 1rem; line-height: 1.6; }
+  .setup-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 14px; margin-bottom: 10px; }
+  .setup-input:focus { outline: none; border-color: var(--primary); }
+  .setup-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- Setup modal (첫 방문 시) -->
+<div class="setup-modal" id="setupModal" style="display:none">
+  <div class="setup-box">
+    <h2>⚙️ 초기 설정</h2>
+    <p>Worker 주소를 입력해주세요.<br>한 번만 입력하면 됩니다.</p>
+    <input type="text" class="setup-input" id="setupUrl" placeholder="https://meal-worker.아이디.workers.dev">
+    <button class="setup-btn" onclick="saveSetup()">저장하고 시작하기</button>
+  </div>
+</div>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>🍽 이번 주 식단</h1>
+      <div class="sub" id="headerDate">-</div>
+    </div>
+    <div class="live-time" id="liveTime">--:--</div>
+  </div>
+  <div class="meal-tabs">
+    <button class="meal-tab" id="tab-b" onclick="setMeal('b')"><span>🌅</span>조식</button>
+    <button class="meal-tab" id="tab-l" onclick="setMeal('l')"><span>☀️</span>중식</button>
+    <button class="meal-tab" id="tab-d" onclick="setMeal('d')"><span>🌙</span>석식</button>
+  </div>
+</div>
+
+<div class="day-bar" id="dayBar"></div>
+<div id="mainContent"><div class="loading"><div class="spinner"></div>불러오는 중...</div></div>
+<div class="footer"><a href="admin.html">관리자 페이지</a></div>
+
+<script>
+const MEAL_KOR = { b: '조식', l: '중식', d: '석식' };
+const DAY_KOR = ['일','월','화','수','목','금','토'];
+
+let menuData = null;
+let selectedDay = null;
+let selectedMeal = 'l';
+
+function getMeal(h) { return h < 10 ? 'b' : h < 15 ? 'l' : 'd'; }
+function today() { return DAY_KOR[new Date().getDay()]; }
+
+function tick() {
+  const n = new Date();
+  document.getElementById('liveTime').textContent = n.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('headerDate').textContent = n.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
+}
+
+function setMeal(m) {
+  selectedMeal = m;
+  document.querySelectorAll('.meal-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + m).classList.add('active');
+  render();
+}
+
+function setDay(key) {
+  selectedDay = key;
+  document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('day-' + key);
+  if (btn) { btn.classList.add('active'); btn.scrollIntoView({ inline: 'center', behavior: 'smooth' }); }
+  render();
+}
+
+function buildDayBar(days) {
+  const bar = document.getElementById('dayBar');
+  bar.innerHTML = '';
+  const t = today();
+  days.forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = 'day-btn' + (d.key.startsWith(t) ? ' today' : '');
+    btn.id = 'day-' + d.key;
+    btn.innerHTML = `<b>${d.key}</b><small>${d.date || ''}</small>`;
+    btn.onclick = () => setDay(d.key);
+    bar.appendChild(btn);
+  });
+}
+
+function render() {
+  const el = document.getElementById('mainContent');
+  if (!menuData?.days?.length) {
+    el.innerHTML = `<div class="no-data"><div class="emoji">📋</div><h3>식단 정보 없음</h3><p>관리자 페이지에서 식단표를 업로드해주세요.</p></div>`;
+    return;
+  }
+  const day = menuData.days.find(d => d.key === selectedDay);
+  if (!day) { el.innerHTML = `<div class="no-data"><div class="emoji">📅</div><h3>해당 날짜 정보 없음</h3></div>`; return; }
+
+  const mealKor = MEAL_KOR[selectedMeal];
+  const meal = day[mealKor];
+  if (!meal) { el.innerHTML = `<div class="no-data"><div class="emoji">🚫</div><h3>${mealKor} 정보가 없습니다</h3></div>`; return; }
+
+  const badgeClass = { b: 'badge-b', l: 'badge-l', d: 'badge-d' }[selectedMeal];
+  const icon = { b: '🌅', l: '☀️', d: '🌙' }[selectedMeal];
+  const plusHTML = meal.plus ? `<div class="plus-card">➕ <strong>PLUS 코너:</strong> ${meal.plus}</div>` : '';
+  const sidesHTML = (meal.sides || []).map(s => {
+    const k = /김치|깍두기|석박지|열무/.test(s);
+    return `<div class="side-item${k?' k':''}">${s}</div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="content">
+      <div class="meal-badge ${badgeClass}">${icon} ${mealKor}</div>
+      <div class="main-card">
+        <div class="main-label">메인 요리</div>
+        <div class="main-name">${meal.main || '-'}</div>
+        ${meal.origin ? `<div class="main-origin">원산지: ${meal.origin}</div>` : ''}
+      </div>
+      ${plusHTML}
+      <div class="sides-label">반찬</div>
+      <div class="sides-grid">${sidesHTML}</div>
+    </div>
+  `;
+}
+
+function saveSetup() {
+  const v = document.getElementById('setupUrl').value.trim().replace(/\/$/, '');
+  if (!v.startsWith('http')) { alert('올바른 URL을 입력해주세요'); return; }
+  localStorage.setItem('worker_url', v);
+  document.getElementById('setupModal').style.display = 'none';
+  loadData();
+}
+
+async function loadData() {
+  const workerUrl = localStorage.getItem('worker_url');
+  if (!workerUrl) { document.getElementById('setupModal').style.display = 'flex'; return; }
+
+  try {
+    const resp = await fetch(workerUrl + '/meal');
+    if (resp.status === 404) { menuData = null; }
+    else { const d = await resp.json(); menuData = d.error ? null : d; }
+  } catch(e) { menuData = null; }
+
+  const n = new Date();
+  const t = today();
+  selectedMeal = getMeal(n.getHours());
+
+  if (menuData?.days?.length) {
+    buildDayBar(menuData.days);
+    const td = menuData.days.find(d => d.key === t || d.key.startsWith(t));
+    selectedDay = td ? td.key : menuData.days[0].key;
+  } else {
+    selectedDay = t;
+    document.getElementById('dayBar').innerHTML = '';
+  }
+
+  setMeal(selectedMeal);
+  setDay(selectedDay);
+}
+
+tick();
+setInterval(tick, 10000);
+loadData();
+</script>
+</body>
+</html>
