@@ -1,1 +1,307 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>식단 관리자</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F4EF; --card: #fff; --primary: #2D5016; --accent: #E8732A;
+    --text: #1A1A1A; --muted: #6B6B6B; --border: #E8E3DA;
+    --ok: #16A34A; --err: #DC2626;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 3rem; }
 
+  .header { background: var(--primary); color: white; padding: 1.25rem; }
+  .header h1 { font-size: 18px; font-weight: 700; }
+  .header p { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+
+  .section { margin: 1rem; }
+  .card { background: var(--card); border-radius: 14px; padding: 1.25rem; border: 1px solid var(--border); margin-bottom: 1rem; }
+  .card-title { font-size: 14px; font-weight: 700; margin-bottom: 1rem; color: var(--primary); }
+
+  .input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .text-input {
+    flex: 1; padding: 10px 12px; border: 1.5px solid var(--border);
+    border-radius: 10px; font-family: inherit; font-size: 13px; background: var(--bg);
+  }
+  .text-input:focus { outline: none; border-color: var(--primary); }
+
+  .btn {
+    padding: 10px 16px; border: none; border-radius: 10px;
+    font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+  }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-accent { background: var(--accent); color: white; width: 100%; padding: 14px; font-size: 15px; font-weight: 700; border-radius: 12px; margin-top: 1rem; }
+  .btn-accent:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-green { background: var(--ok); color: white; width: 100%; padding: 14px; font-size: 15px; font-weight: 700; border-radius: 12px; margin-top: 1rem; display: none; }
+  .btn-green.show { display: block; }
+
+  .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .status { font-size: 12px; margin-top: 6px; }
+  .status.ok { color: var(--ok); }
+  .status.err { color: var(--err); }
+
+  .upload-zone {
+    border: 2px dashed var(--border); border-radius: 12px; padding: 2rem;
+    text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg);
+  }
+  .upload-zone:hover, .upload-zone.over { border-color: var(--primary); background: #F0F7EA; }
+  .upload-zone .icon { font-size: 40px; margin-bottom: 0.75rem; }
+  .upload-zone p { font-size: 14px; color: var(--muted); }
+  #fileInput { display: none; }
+
+  .preview-box { margin-top: 1rem; display: none; }
+  .preview-box img { width: 100%; border-radius: 10px; border: 1px solid var(--border); }
+  .preview-box .pdf-name {
+    background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 10px;
+    padding: 12px; font-size: 14px; color: #1D4ED8; text-align: center;
+  }
+
+  .status-box {
+    margin-top: 1rem; padding: 12px 14px; border-radius: 10px;
+    font-size: 13px; line-height: 1.6; display: none;
+  }
+  .status-box.loading { background: #EFF6FF; color: #1D4ED8; display: block; }
+  .status-box.success { background: #F0FDF4; color: var(--ok); display: block; }
+  .status-box.error { background: #FEF2F2; color: var(--err); display: block; }
+
+  .progress { height: 4px; background: var(--border); border-radius: 2px; margin-top: 8px; display: none; overflow: hidden; }
+  .progress-fill { height: 100%; background: #3B82F6; border-radius: 2px; transition: width 0.4s; }
+
+  .result-day {
+    background: var(--bg); border-radius: 10px; padding: 10px 12px;
+    margin-bottom: 8px; font-size: 13px; border: 1px solid var(--border);
+  }
+  .result-day strong { color: var(--primary); }
+
+  .back-link { display: block; text-align: center; margin: 1rem; color: var(--muted); font-size: 13px; text-decoration: none; }
+
+  .worker-url-hint {
+    background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px;
+    padding: 10px 14px; font-size: 12px; color: #92400E; margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>⚙️ 식단 관리자</h1>
+  <p>식단표 이미지 또는 PDF를 업로드하면 자동 분석됩니다</p>
+</div>
+
+<div class="section">
+
+  <!-- Worker URL 설정 -->
+  <div class="card">
+    <div class="card-title">🔗 Worker 주소 설정</div>
+    <div class="input-row">
+      <input type="text" class="text-input" id="workerUrl" placeholder="https://meal-worker.아이디.workers.dev">
+      <button class="btn btn-primary" onclick="saveWorkerUrl()">저장</button>
+    </div>
+    <div class="status" id="urlStatus"></div>
+    <div class="worker-url-hint">
+      Cloudflare Workers 배포 후 생성된 주소를 입력하세요.<br>
+      가이드 아래쪽을 참고하세요.
+    </div>
+  </div>
+
+  <!-- 관리자 비밀번호 -->
+  <div class="card">
+    <div class="card-title">🔑 관리자 비밀번호</div>
+    <div class="input-row">
+      <input type="password" class="text-input" id="adminPw" placeholder="설정한 비밀번호 입력">
+      <button class="btn btn-primary" onclick="savePw()">저장</button>
+    </div>
+    <div class="status" id="pwStatus"></div>
+    <div class="hint">Cloudflare에 설정한 ADMIN_PASSWORD 값과 동일하게 입력하세요.</div>
+  </div>
+
+  <!-- 파일 업로드 -->
+  <div class="card">
+    <div class="card-title">📸 식단표 업로드</div>
+    <div class="upload-zone" id="uploadZone"
+         onclick="document.getElementById('fileInput').click()"
+         ondragover="onDragOver(event)" ondrop="onDrop(event)" ondragleave="onDragLeave()">
+      <div class="icon">📋</div>
+      <p>식단표 이미지 또는 PDF를<br>탭하거나 끌어다 놓으세요</p>
+      <p style="font-size:12px; margin-top:8px; opacity:0.6">JPG · PNG · PDF 지원</p>
+    </div>
+    <input type="file" id="fileInput" accept="image/*,.pdf" onchange="onFileSelect(event)">
+    <div class="preview-box" id="previewBox"></div>
+    <button class="btn-accent" id="analyzeBtn" onclick="analyzeFile()" disabled>
+      🔍 메뉴 자동 분석하기
+    </button>
+    <div class="status-box" id="statusBox"></div>
+    <div class="progress" id="progressBar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- 결과 -->
+  <div class="card" id="resultCard" style="display:none">
+    <div class="card-title">✅ 분석 결과</div>
+    <div id="resultContent"></div>
+    <button class="btn-green show" onclick="publish()">📢 식단 업데이트 적용하기</button>
+  </div>
+
+</div>
+
+<a href="index.html" class="back-link">← 식단 보기로 돌아가기</a>
+
+<script>
+let selectedFile = null;
+let parsedData = null;
+
+window.onload = () => {
+  const url = localStorage.getItem('worker_url');
+  const pw = localStorage.getItem('admin_pw');
+  if (url) { document.getElementById('workerUrl').value = url; document.getElementById('urlStatus').textContent = '✓ 저장됨'; document.getElementById('urlStatus').className = 'status ok'; }
+  if (pw) { document.getElementById('adminPw').value = pw; document.getElementById('pwStatus').textContent = '✓ 저장됨'; document.getElementById('pwStatus').className = 'status ok'; }
+};
+
+function saveWorkerUrl() {
+  const v = document.getElementById('workerUrl').value.trim().replace(/\/$/, '');
+  if (!v.startsWith('http')) { setFieldStatus('urlStatus', false, '올바른 URL을 입력하세요'); return; }
+  localStorage.setItem('worker_url', v);
+  setFieldStatus('urlStatus', true, '✓ 저장되었습니다');
+}
+
+function savePw() {
+  const v = document.getElementById('adminPw').value;
+  if (!v) { setFieldStatus('pwStatus', false, '비밀번호를 입력하세요'); return; }
+  localStorage.setItem('admin_pw', v);
+  setFieldStatus('pwStatus', true, '✓ 저장되었습니다');
+}
+
+function setFieldStatus(id, ok, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = 'status ' + (ok ? 'ok' : 'err');
+}
+
+function onDragOver(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('over'); }
+function onDragLeave() { document.getElementById('uploadZone').classList.remove('over'); }
+function onDrop(e) { e.preventDefault(); onDragLeave(); const f = e.dataTransfer.files[0]; if (f) setFile(f); }
+function onFileSelect(e) { if (e.target.files[0]) setFile(e.target.files[0]); }
+
+function setFile(file) {
+  selectedFile = file;
+  const box = document.getElementById('previewBox');
+  box.style.display = 'block';
+
+  if (file.type === 'application/pdf') {
+    box.innerHTML = `<div class="pdf-name">📄 ${file.name}</div>`;
+  } else {
+    const reader = new FileReader();
+    reader.onload = e => { box.innerHTML = `<img src="${e.target.result}">`; };
+    reader.readAsDataURL(file);
+  }
+
+  document.getElementById('analyzeBtn').disabled = false;
+  document.getElementById('uploadZone').querySelector('p').textContent = file.name;
+}
+
+function setStatus(type, msg) {
+  const box = document.getElementById('statusBox');
+  box.className = 'status-box ' + type;
+  box.textContent = msg;
+}
+
+function setProgress(pct) {
+  const bar = document.getElementById('progressBar');
+  bar.style.display = pct > 0 ? 'block' : 'none';
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+async function fileToBase64(file) {
+  // PDF는 첫 페이지를 이미지로 변환
+  if (file.type === 'application/pdf') {
+    return await pdfToImageBase64(file);
+  }
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = () => rej(new Error('파일 읽기 실패'));
+    r.readAsDataURL(file);
+  });
+}
+
+async function pdfToImageBase64(file) {
+  // PDF.js 없이 직접 base64로 전송 (Worker에서 처리)
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = () => rej(new Error('PDF 읽기 실패'));
+    r.readAsDataURL(file);
+  });
+}
+
+async function analyzeFile() {
+  const workerUrl = localStorage.getItem('worker_url');
+  const adminPw = localStorage.getItem('admin_pw');
+
+  if (!workerUrl) { setStatus('error', 'Worker 주소를 먼저 저장해주세요.'); return; }
+  if (!adminPw) { setStatus('error', '관리자 비밀번호를 먼저 저장해주세요.'); return; }
+  if (!selectedFile) { setStatus('error', '파일을 선택해주세요.'); return; }
+
+  document.getElementById('analyzeBtn').disabled = true;
+  document.getElementById('resultCard').style.display = 'none';
+  setStatus('loading', '파일을 분석하는 중입니다... (20~40초 소요)');
+  setProgress(20);
+
+  try {
+    const base64 = await fileToBase64(selectedFile);
+    setProgress(50);
+
+    const mimeType = selectedFile.type === 'application/pdf' ? 'application/pdf' : selectedFile.type;
+
+    const resp = await fetch(workerUrl + '/analyze', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Password': adminPw
+      },
+      body: JSON.stringify({ imageBase64: base64, mimeType })
+    });
+
+    setProgress(85);
+    const result = await resp.json();
+
+    if (!resp.ok || result.error) {
+      throw new Error(result.error || '서버 오류');
+    }
+
+    parsedData = result.data;
+    setProgress(100);
+    setStatus('success', `✓ 분석 완료! ${parsedData.days?.length || 0}개 날짜 인식`);
+    showResult(parsedData);
+
+  } catch(e) {
+    setStatus('error', '오류: ' + e.message);
+    setProgress(0);
+    document.getElementById('analyzeBtn').disabled = false;
+  }
+}
+
+function showResult(data) {
+  const card = document.getElementById('resultCard');
+  card.style.display = 'block';
+  const html = (data.days || []).map(d => {
+    const meals = ['조식','중식','석식'].filter(m => d[m]).map(m => `${m}: ${d[m].main}`).join(' · ');
+    return `<div class="result-day"><strong>${d.key} (${d.date})</strong><br>${meals}</div>`;
+  }).join('');
+  document.getElementById('resultContent').innerHTML = html;
+  setProgress(0);
+}
+
+async function publish() {
+  // 이미 Worker에 저장됨 — 확인 메시지만
+  alert('✅ 식단이 업데이트되었습니다!\n모든 사용자에게 바로 반영됩니다.');
+  window.location.href = 'index.html';
+}
+</script>
+</body>
+</html>
