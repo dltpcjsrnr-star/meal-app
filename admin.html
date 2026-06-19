@@ -156,7 +156,7 @@ let selectedFile = null;
 let parsedData = null;
 
 window.onload = () => {
-  const url = localStorage.getItem('worker_url') || 'https://meal-worker-api.dltpcjsrnr.workers.dev';
+  const url = localStorage.getItem('worker_url') || 'https://meal-worker.dltpcjsrnr.workers.dev';
   localStorage.setItem('worker_url', url);
   const pw = localStorage.getItem('admin_pw');
   if (url) { document.getElementById('workerUrl').value = url; document.getElementById('urlStatus').textContent = '✓ 저장됨'; document.getElementById('urlStatus').className = 'status ok'; }
