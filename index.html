@@ -201,8 +201,8 @@ function buildLineTabs(baseDay) {
 
   tabsEl.style.display = 'flex';
   tabsEl.innerHTML = lines.map(d => {
-    const lineName = d.key.replace(baseDay, '') || 'A';
-    return `<button class="line-tab${d.key === selectedLine ? ' active' : ''}" onclick="setLine('${d.key}')">${lineName} 라인</button>`;
+const lineIdx = lines.indexOf(d) + 1;
+return `<button class="line-tab${d.key === selectedLine ? ' active' : ''}" onclick="setLine('${d.key}')">선택식 ${lineIdx}</button>`;
   }).join('');
 
   if (!selectedLine || getBaseDay(selectedLine) !== baseDay) {
