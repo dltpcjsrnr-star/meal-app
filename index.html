@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>오늘의 식단</title>
+<title>성.직.전</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -14,20 +14,17 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 3rem; }
 
-  /* Header */
   .header { background: var(--primary); color: white; padding: 1.25rem 1.25rem 1.5rem; position: sticky; top: 0; z-index: 10; }
   .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
   .header h1 { font-size: 20px; font-weight: 700; }
   .header .sub { font-size: 12px; opacity: 0.65; margin-top: 3px; }
   .live-time { font-size: 13px; background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; }
 
-  /* Meal tabs */
   .meal-tabs { display: flex; gap: 8px; }
   .meal-tab { flex: 1; padding: 8px 4px; border: none; border-radius: 10px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.6); transition: all 0.2s; }
   .meal-tab.active { background: white; color: var(--primary); }
   .meal-tab span { display: block; font-size: 16px; margin-bottom: 2px; }
 
-  /* Day bar */
   .day-bar { background: white; border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; scrollbar-width: none; padding: 0 0.75rem; }
   .day-bar::-webkit-scrollbar { display: none; }
   .day-btn { flex-shrink: 0; padding: 12px 14px; border: none; background: none; font-family: inherit; font-size: 13px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
@@ -36,7 +33,6 @@
   .day-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
   .day-btn.today b::after { content: ''; display: inline-block; width: 4px; height: 4px; background: var(--accent); border-radius: 50%; margin-left: 4px; vertical-align: middle; }
 
-  /* Content */
   .content { padding: 1rem; }
 
   .main-card { background: var(--primary); color: white; border-radius: 16px; padding: 1.25rem; margin-bottom: 0.75rem; position: relative; overflow: hidden; }
@@ -49,45 +45,51 @@
   .badge-l { background: var(--accent-light); color: var(--accent); }
   .badge-d { background: #F5F3FF; color: var(--purple); }
 
+  /* 평가 버튼 */
+  .rating-box { display: flex; gap: 10px; margin-top: 12px; }
+  .vote-btn {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 9px; border: 1.5px solid rgba(255,255,255,0.25); border-radius: 10px;
+    background: rgba(255,255,255,0.1); color: white; font-family: inherit;
+    font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s;
+  }
+  .vote-btn:hover { background: rgba(255,255,255,0.2); }
+  .vote-btn.voted-good { background: rgba(255,255,255,0.9); color: #16A34A; border-color: transparent; }
+  .vote-btn.voted-bad { background: rgba(255,255,255,0.9); color: #DC2626; border-color: transparent; }
+  .vote-btn .count { font-size: 13px; font-weight: 700; }
+
   .plus-card { background: #F0FAF0; border: 1px solid #BBE3BB; border-radius: 12px; padding: 10px 14px; margin-bottom: 0.75rem; font-size: 13px; color: #2D6A2D; }
   .sides-label { font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
   .sides-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .side-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.4; }
   .side-item.k { border-left: 3px solid var(--accent); }
 
-  /* States */
+  /* 공지사항 */
+  .notice-card {
+    margin: 0 1rem 1rem;
+    background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 14px;
+    padding: 1rem 1.25rem; display: none;
+  }
+  .notice-card.show { display: block; }
+  .notice-title { font-size: 12px; font-weight: 700; color: #92400E; margin-bottom: 6px; }
+  .notice-text { font-size: 14px; color: #78350F; line-height: 1.6; white-space: pre-wrap; }
+
   .loading { text-align: center; padding: 3rem 1rem; color: var(--muted); }
   .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .no-data { text-align: center; padding: 3rem 1rem; color: var(--muted); }
   .no-data .emoji { font-size: 40px; margin-bottom: 1rem; }
   .no-data h3 { font-size: 16px; font-weight: 500; margin-bottom: 0.5rem; }
-  .no-data p { font-size: 13px; line-height: 1.6; }
 
   .footer { text-align: center; padding: 1rem; font-size: 12px; color: var(--muted); }
   .footer a { color: var(--primary-light); text-decoration: none; font-weight: 500; }
-
-  /* Setup modal */
-  .setup-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
-  .setup-box { background: white; border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 360px; }
-  .setup-box h2 { font-size: 16px; font-weight: 700; margin-bottom: 0.5rem; color: var(--primary); }
-  .setup-box p { font-size: 13px; color: var(--muted); margin-bottom: 1rem; line-height: 1.6; }
-  .setup-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 14px; margin-bottom: 10px; }
-  .setup-input:focus { outline: none; border-color: var(--primary); }
-  .setup-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
 </style>
+<link rel="apple-touch-icon" href="icon.jpg">
+<link rel="icon" href="icon.jpg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="이번주 식단">
 </head>
 <body>
-
-<!-- Setup modal (첫 방문 시) -->
-<div class="setup-modal" id="setupModal" style="display:none">
-  <div class="setup-box">
-    <h2>⚙️ 초기 설정</h2>
-    <p>Worker 주소를 입력해주세요.<br>한 번만 입력하면 됩니다.</p>
-    <input type="text" class="setup-input" id="setupUrl" placeholder="https://meal-worker.아이디.workers.dev">
-    <button class="setup-btn" onclick="saveSetup()">저장하고 시작하기</button>
-  </div>
-</div>
 
 <div class="header">
   <div class="header-top">
@@ -106,15 +108,28 @@
 
 <div class="day-bar" id="dayBar"></div>
 <div id="mainContent"><div class="loading"><div class="spinner"></div>불러오는 중...</div></div>
-<div class="footer"><a href="admin.html">관리자 페이지</a></div>
+
+<!-- 공지사항 -->
+<div class="notice-card" id="noticeCard">
+  <div class="notice-title">📢 공지사항</div>
+  <div class="notice-text" id="noticeText"></div>
+</div>
+
+<div class="footer">
+  <div style="margin-bottom:6px;color:#6B6B6B;font-size:12px">Made by 홍보팀 · 이세웅</div>
+  <a href="admin.html">관리자 페이지</a>
+</div>
 
 <script>
+const WORKER_URL = 'https://meal-worker-api.dltpcjsrnr.workers.dev';
 const MEAL_KOR = { b: '조식', l: '중식', d: '석식' };
 const DAY_KOR = ['일','월','화','수','목','금','토'];
 
 let menuData = null;
 let selectedDay = null;
 let selectedMeal = 'l';
+let ratingsCache = {};
+let votedCache = {};
 
 function getMeal(h) { return h < 10 ? 'b' : h < 15 ? 'l' : 'd'; }
 function today() { return DAY_KOR[new Date().getDay()]; }
@@ -154,10 +169,53 @@ function buildDayBar(days) {
   });
 }
 
-function render() {
+function ratingKey() {
+  return selectedDay + '_' + MEAL_KOR[selectedMeal];
+}
+
+async function loadRatings(key) {
+  if (ratingsCache[key]) return ratingsCache[key];
+  try {
+    const resp = await fetch(WORKER_URL + '/ratings?key=' + encodeURIComponent(key));
+    const data = await resp.json();
+    ratingsCache[key] = data;
+    return data;
+  } catch(e) { return { good: 0, bad: 0 }; }
+}
+
+async function vote(type) {
+  const key = ratingKey();
+  if (votedCache[key]) return; // 이미 투표함
+
+  try {
+    const resp = await fetch(WORKER_URL + '/vote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, type })
+    });
+    const data = await resp.json();
+    ratingsCache[key] = data;
+    votedCache[key] = type;
+    updateVoteButtons(data, type);
+  } catch(e) {}
+}
+
+function updateVoteButtons(ratings, voted) {
+  const goodBtn = document.getElementById('vote-good');
+  const badBtn = document.getElementById('vote-bad');
+  if (!goodBtn || !badBtn) return;
+  goodBtn.querySelector('.count').textContent = ratings.good;
+  badBtn.querySelector('.count').textContent = ratings.bad;
+  goodBtn.classList.toggle('voted-good', voted === 'good');
+  badBtn.classList.toggle('voted-bad', voted === 'bad');
+  goodBtn.disabled = !!voted;
+  badBtn.disabled = !!voted;
+}
+
+async function render() {
   const el = document.getElementById('mainContent');
   if (!menuData?.days?.length) {
-    el.innerHTML = `<div class="no-data"><div class="emoji">📋</div><h3>식단 정보 없음</h3><p>관리자 페이지에서 식단표를 업로드해주세요.</p></div>`;
+    el.innerHTML = `<div class="no-data"><div class="emoji">📋</div><h3>식단 정보 없음</h3><p style="font-size:13px;color:var(--muted);margin-top:4px">관리자 페이지에서 식단표를 업로드해주세요.</p></div>`;
     return;
   }
   const day = menuData.days.find(d => d.key === selectedDay);
@@ -182,30 +240,46 @@ function render() {
         <div class="main-label">메인 요리</div>
         <div class="main-name">${meal.main || '-'}</div>
         ${meal.origin ? `<div class="main-origin">원산지: ${meal.origin}</div>` : ''}
+        <div class="rating-box">
+          <button class="vote-btn" id="vote-good" onclick="vote('good')">
+            👍 맛있어요 <span class="count">-</span>
+          </button>
+          <button class="vote-btn" id="vote-bad" onclick="vote('bad')">
+            👎 별로예요 <span class="count">-</span>
+          </button>
+        </div>
       </div>
       ${plusHTML}
       <div class="sides-label">반찬</div>
       <div class="sides-grid">${sidesHTML}</div>
     </div>
   `;
+
+  // 평점 불러오기
+  const key = ratingKey();
+  const ratings = await loadRatings(key);
+  const voted = votedCache[key] || null;
+  updateVoteButtons(ratings, voted);
 }
 
-function saveSetup() {
-  const v = document.getElementById('setupUrl').value.trim().replace(/\/$/, '');
-  if (!v.startsWith('http')) { alert('올바른 URL을 입력해주세요'); return; }
-  localStorage.setItem('worker_url', v);
-  document.getElementById('setupModal').style.display = 'none';
-  loadData();
+async function loadNotice() {
+  try {
+    const resp = await fetch(WORKER_URL + '/notice');
+    const data = await resp.json();
+    const card = document.getElementById('noticeCard');
+    if (data.notice && data.notice.trim()) {
+      document.getElementById('noticeText').textContent = data.notice;
+      card.classList.add('show');
+    } else {
+      card.classList.remove('show');
+    }
+  } catch(e) {}
 }
 
 async function loadData() {
-  const workerUrl = localStorage.getItem('worker_url') || 'https://meal-worker.dltpcjsrnr.workers.dev';
-  localStorage.setItem('worker_url', workerUrl);
-
   try {
-    const resp = await fetch(workerUrl + '/meal');
-    if (resp.status === 404) { menuData = null; }
-    else { const d = await resp.json(); menuData = d.error ? null : d; }
+    const resp = await fetch(WORKER_URL + '/meal');
+    if (resp.status !== 404) { const d = await resp.json(); menuData = d.error ? null : d; }
   } catch(e) { menuData = null; }
 
   const n = new Date();
@@ -223,6 +297,7 @@ async function loadData() {
 
   setMeal(selectedMeal);
   setDay(selectedDay);
+  loadNotice();
 }
 
 tick();
