@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>성.직.전</title>
+<title>오늘의 식단</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -81,6 +81,11 @@
   .no-data .emoji { font-size: 40px; margin-bottom: 1rem; }
   .no-data h3 { font-size: 16px; font-weight: 500; margin-bottom: 0.5rem; }
 
+  /* A/B 라인 탭 */
+  .line-tabs { display: flex; gap: 6px; margin: 0 1rem 0.75rem; }
+  .line-tab { padding: 7px 18px; border: 1.5px solid var(--border); border-radius: 20px; background: var(--card); font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--muted); transition: all 0.15s; }
+  .line-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+
   .footer { text-align: center; padding: 1rem; font-size: 12px; color: var(--muted); }
   .footer a { color: var(--primary-light); text-decoration: none; font-weight: 500; }
 </style>
@@ -107,6 +112,7 @@
 </div>
 
 <div class="day-bar" id="dayBar"></div>
+<div class="line-tabs" id="lineTabs" style="display:none"></div>
 <div id="mainContent"><div class="loading"><div class="spinner"></div>불러오는 중...</div></div>
 
 <!-- 공지사항 -->
@@ -115,10 +121,7 @@
   <div class="notice-text" id="noticeText"></div>
 </div>
 
-<div class="footer">
-  <div style="margin-bottom:6px;color:#6B6B6B;font-size:12px">Made by 홍보팀 · 이세웅</div>
-  <a href="admin.html">관리자 페이지</a>
-</div>
+<div class="footer"><a href="admin.html">관리자 페이지</a></div>
 
 <script>
 const WORKER_URL = 'https://meal-worker.dltpcjsrnr.workers.dev';
@@ -148,29 +151,79 @@ function setMeal(m) {
 }
 
 function setDay(key) {
-  selectedDay = key;
+  const base = getBaseDay(key);
+  selectedDay = base;
   document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
-  const btn = document.getElementById('day-' + key);
+  const btn = document.getElementById('day-' + base);
   if (btn) { btn.classList.add('active'); btn.scrollIntoView({ inline: 'center', behavior: 'smooth' }); }
+  buildLineTabs(base);
   render();
+}
+
+let selectedLine = null; // A/B 라인 선택
+
+function getBaseDay(key) { return key.replace(/[AB]$/, ''); }
+function hasMultiLine(baseDay) {
+  if (!menuData?.days) return false;
+  return menuData.days.filter(d => getBaseDay(d.key) === baseDay).length > 1;
 }
 
 function buildDayBar(days) {
   const bar = document.getElementById('dayBar');
   bar.innerHTML = '';
   const t = today();
+
+  // 중복 제거 — 같은 날짜는 하나로 묶기
+  const seen = new Set();
   days.forEach(d => {
+    const base = getBaseDay(d.key);
+    if (seen.has(base)) return;
+    seen.add(base);
+
     const btn = document.createElement('button');
-    btn.className = 'day-btn' + (d.key.startsWith(t) ? ' today' : '');
-    btn.id = 'day-' + d.key;
-    btn.innerHTML = `<b>${d.key}</b><small>${d.date || ''}</small>`;
-    btn.onclick = () => setDay(d.key);
+    btn.className = 'day-btn' + (base === t ? ' today' : '');
+    btn.id = 'day-' + base;
+    btn.innerHTML = `<b>${base}</b><small>${d.date || ''}</small>`;
+    btn.onclick = () => setDay(base);
     bar.appendChild(btn);
   });
 }
 
+function buildLineTabs(baseDay) {
+  const lines = menuData.days.filter(d => getBaseDay(d.key) === baseDay);
+  const tabsEl = document.getElementById('lineTabs');
+
+  if (lines.length <= 1) {
+    tabsEl.style.display = 'none';
+    selectedLine = lines[0]?.key || baseDay;
+    return;
+  }
+
+  tabsEl.style.display = 'flex';
+  tabsEl.innerHTML = lines.map(d => {
+    const lineName = d.key.replace(baseDay, '') || 'A';
+    return `<button class="line-tab${d.key === selectedLine ? ' active' : ''}" onclick="setLine('${d.key}')">${lineName} 라인</button>`;
+  }).join('');
+
+  if (!selectedLine || getBaseDay(selectedLine) !== baseDay) {
+    selectedLine = lines[0].key;
+    tabsEl.querySelectorAll('.line-tab')[0]?.classList.add('active');
+  }
+}
+
+function setLine(key) {
+  selectedLine = key;
+  document.querySelectorAll('.line-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.line-tab').forEach(t => {
+    if (t.textContent.trim() === key.replace(getBaseDay(key), '') + ' 라인') t.classList.add('active');
+  });
+  // 더 간단하게: 다시 빌드
+  buildLineTabs(getBaseDay(key));
+  render();
+}
+
 function ratingKey() {
-  return selectedDay + '_' + MEAL_KOR[selectedMeal];
+  return (selectedLine || selectedDay) + '_' + MEAL_KOR[selectedMeal];
 }
 
 async function loadRatings(key) {
@@ -218,7 +271,7 @@ async function render() {
     el.innerHTML = `<div class="no-data"><div class="emoji">📋</div><h3>식단 정보 없음</h3><p style="font-size:13px;color:var(--muted);margin-top:4px">관리자 페이지에서 식단표를 업로드해주세요.</p></div>`;
     return;
   }
-  const day = menuData.days.find(d => d.key === selectedDay);
+  const day = menuData.days.find(d => d.key === (selectedLine || selectedDay));
   if (!day) { el.innerHTML = `<div class="no-data"><div class="emoji">📅</div><h3>해당 날짜 정보 없음</h3></div>`; return; }
 
   const mealKor = MEAL_KOR[selectedMeal];
@@ -288,10 +341,12 @@ async function loadData() {
 
   if (menuData?.days?.length) {
     buildDayBar(menuData.days);
-    const td = menuData.days.find(d => d.key === t || d.key.startsWith(t));
-    selectedDay = td ? td.key : menuData.days[0].key;
+    const td = menuData.days.find(d => getBaseDay(d.key) === t);
+    selectedDay = td ? getBaseDay(td.key) : getBaseDay(menuData.days[0].key);
+    selectedLine = td ? td.key : menuData.days[0].key;
   } else {
     selectedDay = t;
+    selectedLine = t;
     document.getElementById('dayBar').innerHTML = '';
   }
 
