@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>오늘의 식단</title>
+<link rel="apple-touch-icon" href="icon.jpg">
+<link rel="icon" href="icon.jpg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="이번주 식단">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -35,6 +39,11 @@
 
   .content { padding: 1rem; }
 
+  /* 선택식 탭 */
+  .option-tabs { display: flex; gap: 8px; margin-bottom: 0.75rem; }
+  .option-tab { padding: 7px 18px; border: 1.5px solid var(--border); border-radius: 20px; background: var(--card); font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--muted); transition: all 0.15s; }
+  .option-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+
   .main-card { background: var(--primary); color: white; border-radius: 16px; padding: 1.25rem; margin-bottom: 0.75rem; position: relative; overflow: hidden; }
   .main-card::before { content: ''; position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.06); border-radius: 50%; }
   .main-label { font-size: 11px; opacity: 0.6; letter-spacing: 0.05em; margin-bottom: 6px; }
@@ -45,14 +54,8 @@
   .badge-l { background: var(--accent-light); color: var(--accent); }
   .badge-d { background: #F5F3FF; color: var(--purple); }
 
-  /* 평가 버튼 */
   .rating-box { display: flex; gap: 10px; margin-top: 12px; }
-  .vote-btn {
-    flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
-    padding: 9px; border: 1.5px solid rgba(255,255,255,0.25); border-radius: 10px;
-    background: rgba(255,255,255,0.1); color: white; font-family: inherit;
-    font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s;
-  }
+  .vote-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px; border: 1.5px solid rgba(255,255,255,0.25); border-radius: 10px; background: rgba(255,255,255,0.1); color: white; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
   .vote-btn:hover { background: rgba(255,255,255,0.2); }
   .vote-btn.voted-good { background: rgba(255,255,255,0.9); color: #16A34A; border-color: transparent; }
   .vote-btn.voted-bad { background: rgba(255,255,255,0.9); color: #DC2626; border-color: transparent; }
@@ -64,12 +67,7 @@
   .side-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.4; }
   .side-item.k { border-left: 3px solid var(--accent); }
 
-  /* 공지사항 */
-  .notice-card {
-    margin: 0 1rem 1rem;
-    background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 14px;
-    padding: 1rem 1.25rem; display: none;
-  }
+  .notice-card { margin: 0 1rem 1rem; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 14px; padding: 1rem 1.25rem; display: none; }
   .notice-card.show { display: block; }
   .notice-title { font-size: 12px; font-weight: 700; color: #92400E; margin-bottom: 6px; }
   .notice-text { font-size: 14px; color: #78350F; line-height: 1.6; white-space: pre-wrap; }
@@ -81,18 +79,9 @@
   .no-data .emoji { font-size: 40px; margin-bottom: 1rem; }
   .no-data h3 { font-size: 16px; font-weight: 500; margin-bottom: 0.5rem; }
 
-  /* A/B 라인 탭 */
-  .line-tabs { display: flex; gap: 6px; margin: 0 1rem 0.75rem; }
-  .line-tab { padding: 7px 18px; border: 1.5px solid var(--border); border-radius: 20px; background: var(--card); font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--muted); transition: all 0.15s; }
-  .line-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
-
   .footer { text-align: center; padding: 1rem; font-size: 12px; color: var(--muted); }
   .footer a { color: var(--primary-light); text-decoration: none; font-weight: 500; }
 </style>
-<link rel="apple-touch-icon" href="icon.jpg">
-<link rel="icon" href="icon.jpg">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="이번주 식단">
 </head>
 <body>
 
@@ -112,16 +101,17 @@
 </div>
 
 <div class="day-bar" id="dayBar"></div>
-<div class="line-tabs" id="lineTabs" style="display:none"></div>
 <div id="mainContent"><div class="loading"><div class="spinner"></div>불러오는 중...</div></div>
 
-<!-- 공지사항 -->
 <div class="notice-card" id="noticeCard">
   <div class="notice-title">📢 공지사항</div>
   <div class="notice-text" id="noticeText"></div>
 </div>
 
-<div class="footer"><a href="admin.html">관리자 페이지</a></div>
+<div class="footer">
+  <div style="margin-bottom:6px">Made by 홍보팀 · 이세웅</div>
+  <a href="admin.html">관리자 페이지</a>
+</div>
 
 <script>
 const WORKER_URL = 'https://meal-worker.dltpcjsrnr.workers.dev';
@@ -131,6 +121,7 @@ const DAY_KOR = ['일','월','화','수','목','금','토'];
 let menuData = null;
 let selectedDay = null;
 let selectedMeal = 'l';
+let selectedOption = 0; // 선택식 인덱스
 let ratingsCache = {};
 let votedCache = {};
 
@@ -145,85 +136,42 @@ function tick() {
 
 function setMeal(m) {
   selectedMeal = m;
+  selectedOption = 0;
   document.querySelectorAll('.meal-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + m).classList.add('active');
   render();
 }
 
 function setDay(key) {
-  const base = getBaseDay(key);
-  selectedDay = base;
+  selectedDay = key;
+  selectedOption = 0;
   document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
-  const btn = document.getElementById('day-' + base);
+  const btn = document.getElementById('day-' + key);
   if (btn) { btn.classList.add('active'); btn.scrollIntoView({ inline: 'center', behavior: 'smooth' }); }
-  buildLineTabs(base);
   render();
 }
 
-let selectedLine = null; // A/B 라인 선택
-
-function getBaseDay(key) { return key.replace(/[AB]$/, ''); }
-function hasMultiLine(baseDay) {
-  if (!menuData?.days) return false;
-  return menuData.days.filter(d => getBaseDay(d.key) === baseDay).length > 1;
+function setOption(idx) {
+  selectedOption = idx;
+  render();
 }
 
 function buildDayBar(days) {
   const bar = document.getElementById('dayBar');
   bar.innerHTML = '';
   const t = today();
-
-  // 중복 제거 — 같은 날짜는 하나로 묶기
-  const seen = new Set();
   days.forEach(d => {
-    const base = getBaseDay(d.key);
-    if (seen.has(base)) return;
-    seen.add(base);
-
     const btn = document.createElement('button');
-    btn.className = 'day-btn' + (base === t ? ' today' : '');
-    btn.id = 'day-' + base;
-    btn.innerHTML = `<b>${base}</b><small>${d.date || ''}</small>`;
-    btn.onclick = () => setDay(base);
+    btn.className = 'day-btn' + (d.key === t ? ' today' : '');
+    btn.id = 'day-' + d.key;
+    btn.innerHTML = `<b>${d.key}</b><small>${d.date || ''}</small>`;
+    btn.onclick = () => setDay(d.key);
     bar.appendChild(btn);
   });
 }
 
-function buildLineTabs(baseDay) {
-  const lines = menuData.days.filter(d => getBaseDay(d.key) === baseDay);
-  const tabsEl = document.getElementById('lineTabs');
-
-  if (lines.length <= 1) {
-    tabsEl.style.display = 'none';
-    selectedLine = lines[0]?.key || baseDay;
-    return;
-  }
-
-  tabsEl.style.display = 'flex';
-  tabsEl.innerHTML = lines.map(d => {
-const lineIdx = lines.indexOf(d) + 1;
-return `<button class="line-tab${d.key === selectedLine ? ' active' : ''}" onclick="setLine('${d.key}')">선택식 ${lineIdx}</button>`;
-  }).join('');
-
-  if (!selectedLine || getBaseDay(selectedLine) !== baseDay) {
-    selectedLine = lines[0].key;
-    tabsEl.querySelectorAll('.line-tab')[0]?.classList.add('active');
-  }
-}
-
-function setLine(key) {
-  selectedLine = key;
-  document.querySelectorAll('.line-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.line-tab').forEach(t => {
-    if (t.textContent.trim() === key.replace(getBaseDay(key), '') + ' 라인') t.classList.add('active');
-  });
-  // 더 간단하게: 다시 빌드
-  buildLineTabs(getBaseDay(key));
-  render();
-}
-
-function ratingKey() {
-  return (selectedLine || selectedDay) + '_' + MEAL_KOR[selectedMeal];
+function ratingKey(optIdx) {
+  return selectedDay + '_' + MEAL_KOR[selectedMeal] + (optIdx > 0 ? '_' + optIdx : '');
 }
 
 async function loadRatings(key) {
@@ -237,9 +185,8 @@ async function loadRatings(key) {
 }
 
 async function vote(type) {
-  const key = ratingKey();
-  if (votedCache[key]) return; // 이미 투표함
-
+  const key = ratingKey(selectedOption);
+  if (votedCache[key]) return;
   try {
     const resp = await fetch(WORKER_URL + '/vote', {
       method: 'POST',
@@ -271,35 +218,45 @@ async function render() {
     el.innerHTML = `<div class="no-data"><div class="emoji">📋</div><h3>식단 정보 없음</h3><p style="font-size:13px;color:var(--muted);margin-top:4px">관리자 페이지에서 식단표를 업로드해주세요.</p></div>`;
     return;
   }
-  const day = menuData.days.find(d => d.key === (selectedLine || selectedDay));
+
+  const day = menuData.days.find(d => d.key === selectedDay);
   if (!day) { el.innerHTML = `<div class="no-data"><div class="emoji">📅</div><h3>해당 날짜 정보 없음</h3></div>`; return; }
 
   const mealKor = MEAL_KOR[selectedMeal];
-  const meal = day[mealKor];
-  if (!meal) { el.innerHTML = `<div class="no-data"><div class="emoji">🚫</div><h3>${mealKor} 정보가 없습니다</h3></div>`; return; }
+  const mealData = day[mealKor];
+  if (!mealData) { el.innerHTML = `<div class="no-data"><div class="emoji">🚫</div><h3>${mealKor} 정보가 없습니다</h3></div>`; return; }
 
   const badgeClass = { b: 'badge-b', l: 'badge-l', d: 'badge-d' }[selectedMeal];
   const icon = { b: '🌅', l: '☀️', d: '🌙' }[selectedMeal];
-  const plusHTML = meal.plus ? `<div class="plus-card">➕ <strong>PLUS 코너:</strong> ${meal.plus}</div>` : '';
-  const sidesHTML = (meal.sides || []).map(s => {
+
+  // 선택식 여부 확인
+  const hasOptions = Array.isArray(mealData.options) && mealData.options.length > 1;
+  const currentMeal = hasOptions ? mealData.options[selectedOption] : mealData;
+
+  // 선택식 탭
+  const optionTabsHTML = hasOptions
+    ? `<div class="option-tabs">${mealData.options.map((_, i) =>
+        `<button class="option-tab${i === selectedOption ? ' active' : ''}" onclick="setOption(${i})">선택식 ${i + 1}</button>`
+      ).join('')}</div>`
+    : '';
+
+  const plusHTML = mealData.plus ? `<div class="plus-card">➕ <strong>PLUS 코너:</strong> ${mealData.plus}</div>` : '';
+  const sidesHTML = (currentMeal.sides || []).map(s => {
     const k = /김치|깍두기|석박지|열무/.test(s);
-    return `<div class="side-item${k?' k':''}">${s}</div>`;
+    return `<div class="side-item${k ? ' k' : ''}">${s}</div>`;
   }).join('');
 
   el.innerHTML = `
     <div class="content">
       <div class="meal-badge ${badgeClass}">${icon} ${mealKor}</div>
+      ${optionTabsHTML}
       <div class="main-card">
         <div class="main-label">메인 요리</div>
-        <div class="main-name">${meal.main || '-'}</div>
-        ${meal.origin ? `<div class="main-origin">원산지: ${meal.origin}</div>` : ''}
+        <div class="main-name">${currentMeal.main || '-'}</div>
+        ${currentMeal.origin ? `<div class="main-origin">원산지: ${currentMeal.origin}</div>` : ''}
         <div class="rating-box">
-          <button class="vote-btn" id="vote-good" onclick="vote('good')">
-            👍 맛있어요 <span class="count">-</span>
-          </button>
-          <button class="vote-btn" id="vote-bad" onclick="vote('bad')">
-            👎 별로예요 <span class="count">-</span>
-          </button>
+          <button class="vote-btn" id="vote-good" onclick="vote('good')">👍 맛있어요 <span class="count">-</span></button>
+          <button class="vote-btn" id="vote-bad" onclick="vote('bad')">👎 별로예요 <span class="count">-</span></button>
         </div>
       </div>
       ${plusHTML}
@@ -308,11 +265,9 @@ async function render() {
     </div>
   `;
 
-  // 평점 불러오기
-  const key = ratingKey();
+  const key = ratingKey(selectedOption);
   const ratings = await loadRatings(key);
-  const voted = votedCache[key] || null;
-  updateVoteButtons(ratings, voted);
+  updateVoteButtons(ratings, votedCache[key] || null);
 }
 
 async function loadNotice() {
@@ -341,12 +296,10 @@ async function loadData() {
 
   if (menuData?.days?.length) {
     buildDayBar(menuData.days);
-    const td = menuData.days.find(d => getBaseDay(d.key) === t);
-    selectedDay = td ? getBaseDay(td.key) : getBaseDay(menuData.days[0].key);
-    selectedLine = td ? td.key : menuData.days[0].key;
+    const td = menuData.days.find(d => d.key === t);
+    selectedDay = td ? td.key : menuData.days[0].key;
   } else {
     selectedDay = t;
-    selectedLine = t;
     document.getElementById('dayBar').innerHTML = '';
   }
 
