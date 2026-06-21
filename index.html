@@ -202,12 +202,15 @@ function setMeal(m) {
   render();
 }
 
-function setDay(key) {
+function setDay(key, scroll = false) {
   selectedDay = key;
   selectedOption = 0;
   document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
   const btn = document.getElementById('day-' + key);
-  if (btn) btn.classList.add('active');
+  if (btn) {
+    btn.classList.add('active');
+    if (scroll) btn.scrollIntoView({ inline: 'center', behavior: 'smooth' });
+  }
   render();
 }
 
@@ -225,7 +228,7 @@ function buildDayBar(days) {
     btn.className = 'day-btn' + (d.key === t ? ' today' : '');
     btn.id = 'day-' + d.key;
     btn.innerHTML = `<b>${d.key}</b><small>${d.date || ''}</small>`;
-    btn.onclick = () => setDay(d.key);
+    btn.onclick = () => setDay(d.key, false);
     bar.appendChild(btn);
   });
 }
@@ -364,7 +367,7 @@ async function loadData() {
   }
 
   setMeal(selectedMeal);
-  setDay(selectedDay);
+  setDay(selectedDay, true);
   loadNotice();
 }
 
