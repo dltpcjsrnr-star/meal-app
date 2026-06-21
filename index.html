@@ -3,36 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>오늘의 식단</title>
+<title>성.직.전</title>
 <link rel="apple-touch-icon" href="icon.jpg">
 <link rel="icon" href="icon.jpg">
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="이번주 식단">
-<meta name="theme-color" content="#0b2d85">
+<meta name="theme-color" content="#2D5016">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #F7F4EF; --card: #fff; --primary: #0b2d85; --primary-light: #1a4ab5;
+    --bg: #F7F4EF; --card: #fff; --primary: #2D5016; --primary-light: #4A7C2F;
     --accent: #E8732A; --accent-light: #FDF0E8; --text: #1A1A1A; --muted: #6B6B6B;
     --border: #E8E3DA; --blue: #3B82F6; --purple: #7C3AED;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 3rem; }
 
-  .header { background: var(--primary); color: white; padding: 0.75rem 1.25rem 1rem; position: sticky; top: 0; z-index: 10; }
+  .header { background: var(--primary); color: white; padding: 1.25rem 1.25rem 1.5rem; position: sticky; top: 0; z-index: 10; }
   .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
-  .header h1 { font-size: 17px; font-weight: 700; }
+  .header h1 { font-size: 20px; font-weight: 700; }
   .header .sub { font-size: 12px; opacity: 0.65; margin-top: 3px; }
   .live-time { font-size: 13px; background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; }
 
   .meal-tabs { display: flex; gap: 8px; }
-  .meal-tab { flex: 1; padding: 6px 4px; border: none; border-radius: 10px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.6); transition: all 0.2s; }
+  .meal-tab { flex: 1; padding: 8px 4px; border: none; border-radius: 10px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.6); transition: all 0.2s; }
   .meal-tab.active { background: white; color: var(--primary); }
   .meal-tab span { display: block; font-size: 16px; margin-bottom: 2px; }
 
-  .day-bar { background: white; border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; scrollbar-width: none; padding: 0 0.75rem; }
+  .day-bar { background: white; border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; scrollbar-width: none; padding: 0 0.75rem; position: sticky; top: 0; z-index: 9; }
   .day-bar::-webkit-scrollbar { display: none; }
   .day-btn { flex-shrink: 0; padding: 12px 14px; border: none; background: none; font-family: inherit; font-size: 13px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
   .day-btn b { display: block; font-size: 15px; font-weight: 700; }
@@ -120,7 +120,7 @@
 <div class="header">
   <div class="header-top">
     <div>
-      <h1>🍽 이번 주 식단</h1>
+      <h1>🍽 성빈센트 이번 주 식단</h1>
       <div class="sub" id="headerDate">-</div>
     </div>
     <div class="live-time" id="liveTime">--:--</div>
@@ -207,7 +207,7 @@ function setDay(key) {
   selectedOption = 0;
   document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
   const btn = document.getElementById('day-' + key);
-  if (btn) { btn.classList.add('active'); btn.scrollIntoView({ inline: 'center', behavior: 'smooth' }); }
+  if (btn) btn.classList.add('active');
   render();
 }
 
