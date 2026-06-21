@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>성.직.전</title>
+<title>오늘의 식단</title>
 <link rel="apple-touch-icon" href="icon.jpg">
 <link rel="icon" href="icon.jpg">
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="성.직.전">
+<meta name="apple-mobile-web-app-title" content="이번주 식단">
 <meta name="theme-color" content="#2D5016">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -70,10 +70,10 @@
   .side-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.4; }
   .side-item.k { border-left: 3px solid var(--accent); }
 
-  .notice-card { margin: 0 1rem 1rem; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 14px; padding: 1rem 1.25rem; display: none; }
+  .notice-card { margin: 0 1rem 1rem; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 14px; padding: 1.25rem; display: none; }
   .notice-card.show { display: block; }
-  .notice-title { font-size: 12px; font-weight: 700; color: #92400E; margin-bottom: 6px; }
-  .notice-text { font-size: 14px; color: #78350F; line-height: 1.6; white-space: pre-wrap; }
+  .notice-title { font-size: 12px; font-weight: 700; color: #92400E; margin-bottom: 8px; }
+  .notice-text { font-size: 14px; color: #78350F; line-height: 1.6; white-space: pre-wrap; background: white; border-radius: 10px; padding: 12px 14px; border: 1px solid #FDE68A; }
 
   .loading { text-align: center; padding: 3rem 1rem; color: var(--muted); }
   .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
@@ -162,8 +162,10 @@
 </div>
 
 
+<div class="notice-card" id="noticeCard">
   <div class="notice-title">📢 공지사항</div>
   <div class="notice-text" id="noticeText"></div>
+</div>
 </div>
 
 <div class="footer">
