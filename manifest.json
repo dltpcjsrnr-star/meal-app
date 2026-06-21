@@ -1,6 +1,6 @@
 {
   "name": "이번 주 식단",
-  "short_name": "식단표",
+  "short_name": "성.직.전",
   "description": "이번 주 식단을 확인하세요",
   "start_url": "/meal-app/",
   "display": "standalone",
