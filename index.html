@@ -462,6 +462,17 @@ tick();
 setInterval(tick, 10000);
 loadData();
 trackVisit();
+  async function trackVisit() {
+  try {
+    const todayKey = 'visited_' + new Date().toISOString().split('T')[0];
+    const visited = localStorage.getItem(todayKey);
+    const resp = await fetch(WORKER_URL + '/visit', { method: visited ? 'GET' : 'POST' });
+    const data = await resp.json();
+    if (!visited) localStorage.setItem(todayKey, '1');
+    document.getElementById('visitToday').textContent = data.today.toLocaleString();
+    document.getElementById('visitTotal').textContent = data.total.toLocaleString();
+  } catch(e) {}
+}
 </script>
 </body>
 </html>
