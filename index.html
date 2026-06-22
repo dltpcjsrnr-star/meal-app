@@ -326,7 +326,7 @@ async function render() {
       ).join('')}</div>`
     : '';
 
-  const plusHTML = mealData.plus ? `<div class="plus-card">➕ <strong>PLUS 코너:</strong> ${mealData.plus}</div>` : '';
+  const plusHTML = (selectedMeal === 'l' && mealData.plus) ? `<div class="plus-card">➕ <strong>PLUS 코너:</strong> ${mealData.plus}</div>` : '';
   const sidesHTML = (currentMeal.sides || []).map(s => {
     const k = /김치|깍두기|석박지|열무/.test(s);
     return `<div class="side-item${k ? ' k' : ''}">${s}</div>`;
