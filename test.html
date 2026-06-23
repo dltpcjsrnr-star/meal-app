@@ -269,7 +269,6 @@ async function getRecommend() {
   // 등록된 식당 목록 가져오기
   let restaurantList = [];
 
-const restaurantInfo = restaurants?.length
 
   try {
     const resp = await fetch(WORKER_URL + '/recommend', {
