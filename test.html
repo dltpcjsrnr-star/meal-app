@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>식단앱 테스트 페이지</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F4EF; --card: #fff; --primary: #0b2d85; --primary-light: #1a4ab5;
+    --accent: #E8732A; --accent-light: #FDF0E8; --text: #1A1A1A; --muted: #6B6B6B;
+    --border: #E8E3DA; --ok: #16A34A; --err: #DC2626;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 5rem; }
+
+  .header { background: var(--primary); color: white; padding: 1.25rem; }
+  .header h1 { font-size: 18px; font-weight: 700; }
+  .header p { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+
+  /* 하단 탭 */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); display: flex; z-index: 50; }
+  .bottom-nav-btn { flex: 1; padding: 10px 4px; border: none; background: none; font-family: inherit; font-size: 11px; color: var(--muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .bottom-nav-btn span { font-size: 22px; }
+  .bottom-nav-btn.active { color: var(--primary); font-weight: 700; }
+
+  .tab-content { display: none; padding: 1rem; }
+  .tab-content.active { display: block; }
+
+  /* 공통 */
+  .card { background: var(--card); border-radius: 14px; padding: 1.25rem; border: 1px solid var(--border); margin-bottom: 1rem; }
+  .card-title { font-size: 14px; font-weight: 700; margin-bottom: 1rem; color: var(--primary); }
+  .btn { padding: 10px 16px; border: none; border-radius: 10px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-full { width: 100%; padding: 13px; font-size: 15px; font-weight: 700; border-radius: 12px; }
+  .btn-full:disabled { opacity: 0.4; cursor: not-allowed; }
+  .input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 14px; margin-bottom: 10px; background: var(--bg); }
+  .input:focus { outline: none; border-color: var(--primary); }
+  .status { font-size: 12px; margin-top: 6px; }
+  .status.ok { color: var(--ok); }
+  .status.err { color: var(--err); }
+
+  /* 피드백 박스 */
+  .feedback-box { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #92400E; margin-bottom: 1rem; }
+
+  /* 메뉴 추천 */
+  .q-step { margin-bottom: 1.25rem; }
+  .q-label { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+  .q-options { display: flex; flex-wrap: wrap; gap: 8px; }
+  .q-btn { padding: 8px 16px; border: 1.5px solid var(--border); border-radius: 20px; background: white; font-family: inherit; font-size: 13px; cursor: pointer; color: var(--text); transition: all 0.15s; }
+  .q-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+  .weather-info { background: #EFF6FF; border-radius: 10px; padding: 8px 12px; font-size: 13px; color: #1D4ED8; margin-bottom: 1rem; }
+  .recommend-summary { background: var(--primary); color: white; border-radius: 12px; padding: 12px 16px; font-size: 14px; margin-bottom: 1rem; line-height: 1.5; }
+  .recommend-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 10px; }
+  .menu-type { display: inline-block; font-size: 11px; background: var(--accent-light); color: var(--accent); padding: 2px 10px; border-radius: 10px; margin-bottom: 6px; }
+  .menu-name { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+  .menu-reason { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+  .naver-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #03C75A; color: white; border: none; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; }
+  .registered-badge { display: inline-block; font-size: 11px; background: #EFF6FF; color: var(--primary); padding: 2px 10px; border-radius: 10px; margin-bottom: 6px; margin-left: 6px; font-weight: 500; }
+
+  /* 식당 리뷰 */
+  .add-restaurant-btn { width: 100%; padding: 12px; border: 1.5px dashed var(--border); border-radius: 12px; background: none; font-family: inherit; font-size: 14px; color: var(--muted); cursor: pointer; margin-bottom: 1rem; }
+  .restaurant-card { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 1rem 1.25rem; margin-bottom: 10px; }
+  .restaurant-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .restaurant-name { font-size: 16px; font-weight: 700; }
+  .restaurant-category { font-size: 11px; background: #EFF6FF; color: var(--primary); padding: 3px 10px; border-radius: 10px; font-weight: 500; }
+  .restaurant-rating { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .rating-num { font-size: 14px; font-weight: 700; }
+  .review-count { font-size: 12px; color: var(--muted); }
+  .restaurant-address { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .restaurant-menus { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .restaurant-menus span { display: inline-block; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; margin: 2px; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .review-btn { padding: 7px 14px; border: 1.5px solid var(--primary); border-radius: 10px; background: none; color: var(--primary); font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .review-btn.gray { border-color: var(--border); color: var(--muted); }
+  .review-btn.danger { border-color: var(--err); color: var(--err); }
+  .reviews-list { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; display: none; }
+  .reviews-list.show { display: block; }
+  .review-item { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .review-item:last-child { border-bottom: none; }
+  .review-meta { display: flex; justify-content: space-between; margin-bottom: 3px; }
+  .review-nick { font-weight: 500; }
+  .review-comment { color: var(--muted); margin-top: 2px; }
+
+  /* 모달 */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: flex-end; }
+  .modal-overlay.show { display: flex; }
+  .modal-box { background: white; border-radius: 20px 20px 0 0; padding: 1.5rem; width: 100%; max-height: 85vh; overflow-y: auto; }
+  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 1rem; }
+  .star-select { display: flex; gap: 8px; margin-bottom: 10px; }
+  .star-btn { font-size: 30px; cursor: pointer; opacity: 0.25; transition: opacity 0.15s; }
+  .star-btn.on { opacity: 1; }
+  .modal-btn { width: 100%; padding: 13px; border: none; border-radius: 12px; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+  .modal-btn-primary { background: var(--primary); color: white; }
+  .modal-btn-cancel { background: var(--bg); color: var(--muted); }
+
+  .loading { text-align: center; padding: 2rem; color: var(--muted); }
+  .spinner { width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 0.75rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .no-data { text-align: center; padding: 2rem; color: var(--muted); }
+  .no-data .emoji { font-size: 36px; margin-bottom: 0.75rem; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🧪 테스트 페이지</h1>
+  <p>메뉴추천 · 식당리뷰 기능 테스트 — 오류나 개선사항 발견 시 관리자에게 알려주세요</p>
+</div>
+
+<!-- 메뉴 추천 탭 -->
+<div id="tab-recommend" class="tab-content active">
+  <div class="feedback-box">💡 테스트 중입니다. 추천 결과가 이상하거나 개선할 점이 있으면 알려주세요!</div>
+
+  <div class="weather-info" id="weatherInfo">🌤 날씨 정보를 불러오는 중...</div>
+
+  <div class="card">
+    <div class="q-step">
+      <div class="q-label">1. 어떤 종류가 땡기세요?</div>
+      <div class="q-options" id="q-type">
+        <button class="q-btn" onclick="toggleQ('type',this,'한식')">🍚 한식</button>
+        <button class="q-btn" onclick="toggleQ('type',this,'중식')">🥢 중식</button>
+        <button class="q-btn" onclick="toggleQ('type',this,'양식')">🍝 양식</button>
+        <button class="q-btn" onclick="toggleQ('type',this,'일식')">🍱 일식</button>
+        <button class="q-btn" onclick="toggleQ('type',this,'분식')">🥫 분식</button>
+        <button class="q-btn" onclick="toggleQ('type',this,'상관없음')">🤷 상관없음</button>
+      </div>
+    </div>
+    <div class="q-step">
+      <div class="q-label">2. 어떤 음식이 먹고 싶어요?</div>
+      <div class="q-options" id="q-food">
+        <button class="q-btn" onclick="toggleQ('food',this,'면류')">🍜 면류</button>
+        <button class="q-btn" onclick="toggleQ('food',this,'고기류')">🥩 고기류</button>
+        <button class="q-btn" onclick="toggleQ('food',this,'찌개/국')">🍲 찌개/국</button>
+        <button class="q-btn" onclick="toggleQ('food',this,'밥류')">🍛 밥류</button>
+        <button class="q-btn" onclick="toggleQ('food',this,'가벼운것')">🥗 가벼운 것</button>
+        <button class="q-btn" onclick="toggleQ('food',this,'상관없음')">🤷 상관없음</button>
+      </div>
+    </div>
+    <div class="q-step">
+      <div class="q-label">3. 예산은요?</div>
+      <div class="q-options" id="q-budget">
+        <button class="q-btn" onclick="toggleQ('budget',this,'1만원 이하')">💰 1만원 이하</button>
+        <button class="q-btn" onclick="toggleQ('budget',this,'1~2만원')">💳 1~2만원</button>
+        <button class="q-btn" onclick="toggleQ('budget',this,'상관없음')">🤷 상관없음</button>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" id="recommendBtn" onclick="getRecommend()">🤖 AI 메뉴 추천받기</button>
+  </div>
+
+  <div id="recommendResult"></div>
+</div>
+
+<!-- 식당 리뷰 탭 -->
+<div id="tab-restaurant" class="tab-content">
+  <div class="feedback-box">💡 테스트 중입니다. 식당 추가/리뷰 기능을 테스트해주세요!</div>
+  <button class="add-restaurant-btn" onclick="showAddRestaurant()">+ 식당 추가하기</button>
+  <div id="restaurantList"><div class="loading"><div class="spinner"></div>불러오는 중...</div></div>
+</div>
+
+<!-- 하단 네비 -->
+<div class="bottom-nav">
+  <button class="bottom-nav-btn active" id="nav-recommend" onclick="switchTab('recommend')"><span>🤖</span>메뉴추천</button>
+  <button class="bottom-nav-btn" id="nav-restaurant" onclick="switchTab('restaurant')"><span>⭐</span>식당리뷰</button>
+</div>
+
+<!-- 식당 추가 모달 -->
+<div class="modal-overlay" id="addRestaurantModal">
+  <div class="modal-box">
+    <div class="modal-title">🏪 식당 추가</div>
+    <input class="input" id="rName" placeholder="식당 이름 *">
+    <select class="input" id="rCategory">
+      <option>한식</option><option>중식</option><option>양식</option>
+      <option>일식</option><option>분식</option><option>카페</option><option>기타</option>
+    </select>
+    <input class="input" id="rAddress" placeholder="주소 (선택)">
+    <input class="input" id="rMenus" placeholder="대표메뉴 (예: 김치찌개, 된장찌개, 비빔밥)">
+    <button class="modal-btn modal-btn-primary" onclick="addRestaurant()">추가하기</button>
+    <button class="modal-btn modal-btn-cancel" onclick="closeModal('addRestaurantModal')">취소</button>
+  </div>
+</div>
+
+<!-- 리뷰 작성 모달 -->
+<div class="modal-overlay" id="addReviewModal">
+  <div class="modal-box">
+    <div class="modal-title">✍️ 리뷰 작성</div>
+    <div class="q-label" style="font-size:13px;margin-bottom:8px">별점 선택</div>
+    <div class="star-select">
+      <span class="star-btn" onclick="setStar(1)">⭐</span>
+      <span class="star-btn" onclick="setStar(2)">⭐</span>
+      <span class="star-btn" onclick="setStar(3)">⭐</span>
+      <span class="star-btn" onclick="setStar(4)">⭐</span>
+      <span class="star-btn" onclick="setStar(5)">⭐</span>
+    </div>
+    <input class="input" id="reviewNick" placeholder="닉네임 (선택, 기본: 익명)">
+    <textarea class="input" id="reviewComment" placeholder="리뷰를 입력해주세요 (선택)" style="height:80px;resize:none"></textarea>
+    <button class="modal-btn modal-btn-primary" onclick="submitReview()">등록하기</button>
+    <button class="modal-btn modal-btn-cancel" onclick="closeModal('addReviewModal')">취소</button>
+  </div>
+</div>
+
+<!-- 관리자 삭제 모달 -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-title">🗑 식당 삭제 (관리자)</div>
+    <input type="password" class="input" id="deletePw" placeholder="관리자 비밀번호">
+    <div class="status err" id="deleteErr" style="display:none">비밀번호가 틀렸습니다</div>
+    <button class="modal-btn modal-btn-primary" style="background:var(--err)" onclick="confirmDelete()">삭제하기</button>
+    <button class="modal-btn modal-btn-cancel" onclick="closeModal('deleteModal')">취소</button>
+  </div>
+</div>
+
+<script>
+const WORKER_URL = 'https://meal-worker.dltpcjsrnr.workers.dev';
+// 테스트용 별도 KV 키 prefix
+const TEST_PREFIX = 'test_';
+
+const qSelections = { type: null, food: null, budget: null };
+let currentWeather = '';
+let currentReviewId = null;
+let currentDeleteId = null;
+let currentStar = 0;
+
+// ── 탭 전환 ──────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('nav-' + tab).classList.add('active');
+  if (tab === 'restaurant') loadRestaurants();
+}
+
+// ── 날씨 ─────────────────────────────────────────────
+async function loadWeather() {
+  try {
+    const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 }));
+    const resp = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&current=temperature_2m,weathercode&timezone=Asia/Seoul`);
+    const data = await resp.json();
+    const temp = Math.round(data.current.temperature_2m);
+    const code = data.current.weathercode;
+    const desc = code === 0 ? '맑음' : code <= 3 ? '구름조금' : code <= 48 ? '흐림/안개' : code <= 67 ? '비' : code <= 77 ? '눈' : '비/눈';
+    currentWeather = `기온 ${temp}°C, ${desc}`;
+    document.getElementById('weatherInfo').textContent = `🌤 현재 날씨: ${currentWeather}`;
+  } catch(e) {
+    document.getElementById('weatherInfo').textContent = '🌤 날씨 정보 없음 (위치 권한 필요)';
+    currentWeather = '정보 없음';
+  }
+}
+
+// ── 메뉴 추천 ────────────────────────────────────────
+function toggleQ(group, btn, value) {
+  document.querySelectorAll('#q-' + group + ' .q-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  qSelections[group] = value;
+}
+
+async function getRecommend() {
+  const btn = document.getElementById('recommendBtn');
+  const result = document.getElementById('recommendResult');
+  const prefs = [];
+  if (qSelections.type) prefs.push('원하는 음식 종류: ' + qSelections.type);
+  if (qSelections.food) prefs.push('먹고 싶은 음식: ' + qSelections.food);
+  if (qSelections.budget) prefs.push('예산: ' + qSelections.budget);
+  if (!prefs.length) { result.innerHTML = '<div style="color:var(--err);font-size:13px;margin-top:0.5rem">최소 하나 이상 선택해주세요!</div>'; return; }
+
+  btn.disabled = true; btn.textContent = '🤖 추천 중...';
+  result.innerHTML = '<div class="loading"><div class="spinner"></div>AI가 추천하는 중...</div>';
+
+  // 등록된 식당 목록 가져오기
+  let restaurantList = [];
+  try {
+    const rResp = await fetch(WORKER_URL + '/test_restaurants');
+    const rData = await rResp.json();
+    if (Array.isArray(rData)) restaurantList = rData;
+  } catch(e) {}
+
+  try {
+    const resp = await fetch(WORKER_URL + '/recommend', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        preferences: prefs.join('\n'),
+        weather: currentWeather,
+        restaurants: restaurantList.map(r => ({ name: r.name, category: r.category, menus: r.menus, rating: r.rating }))
+      })
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+
+    result.innerHTML = `
+      <div class="recommend-summary">💬 ${data.summary}</div>
+      ${(data.recommendations || []).map(r => {
+        const isRegistered = r.restaurantName;
+        const naverQuery = encodeURIComponent(isRegistered ? r.restaurantName : r.menu);
+        return `
+          <div class="recommend-card">
+            <div>
+              <span class="menu-type">${r.type}</span>
+              ${isRegistered ? `<span class="registered-badge">⭐ 등록 식당</span>` : ''}
+            </div>
+            <div class="menu-name">${isRegistered ? r.restaurantName + ' — ' + r.menu : r.menu}</div>
+            <div class="menu-reason">${r.reason}</div>
+            <a class="naver-btn" href="https://map.naver.com/v5/search/${naverQuery}" target="_blank">
+              🗺 네이버 지도에서 ${isRegistered ? '찾기' : '검색'}
+            </a>
+          </div>`;
+      }).join('')}`;
+  } catch(e) {
+    result.innerHTML = `<div style="color:var(--err);font-size:13px;margin-top:0.5rem">오류: ${e.message}</div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = '🤖 AI 메뉴 추천받기';
+  }
+}
+
+// ── 식당 리뷰 ────────────────────────────────────────
+async function loadRestaurants() {
+  const el = document.getElementById('restaurantList');
+  try {
+    const resp = await fetch(WORKER_URL + '/test_restaurants');
+    const list = await resp.json();
+    if (!Array.isArray(list) || !list.length) {
+      el.innerHTML = '<div class="no-data"><div class="emoji">🏪</div><p>등록된 식당이 없어요<br>첫 번째 식당을 추가해보세요!</p></div>';
+      return;
+    }
+    // 리뷰 많은순 정렬
+    list.sort((a, b) => b.reviewCount - a.reviewCount);
+    el.innerHTML = list.map(r => `
+      <div class="restaurant-card">
+        <div class="restaurant-header">
+          <div class="restaurant-name">${r.name}</div>
+          <div class="restaurant-category">${r.category}</div>
+        </div>
+        <div class="restaurant-rating">
+          <span>${'⭐'.repeat(Math.round(r.rating || 0))}</span>
+          <span class="rating-num">${r.rating || '-'}</span>
+          <span class="review-count">(${r.reviewCount}개 리뷰)</span>
+        </div>
+        ${r.address ? `<div class="restaurant-address">📍 ${r.address}</div>` : ''}
+        ${r.menus?.length ? `<div class="restaurant-menus">🍽 ${r.menus.map(m => `<span>${m}</span>`).join('')}</div>` : ''}
+        <div class="btn-row">
+          <button class="review-btn" onclick="showReview(${r.id})">리뷰 작성</button>
+          <button class="review-btn gray" onclick="toggleReviews(${r.id})">리뷰 보기</button>
+          <a class="naver-btn" href="https://map.naver.com/v5/search/${encodeURIComponent(r.name)}" target="_blank" style="font-size:12px;padding:6px 12px">🗺 지도</a>
+          <button class="review-btn danger" onclick="showDelete(${r.id})">삭제</button>
+        </div>
+        <div class="reviews-list" id="reviews-${r.id}">
+          ${!r.reviews?.length ? '<div style="font-size:13px;color:var(--muted)">아직 리뷰가 없어요</div>' :
+            r.reviews.map(rv => `
+              <div class="review-item">
+                <div class="review-meta">
+                  <span class="review-nick">${rv.nickname}</span>
+                  <span>${'⭐'.repeat(rv.score)}</span>
+                </div>
+                ${rv.comment ? `<div class="review-comment">${rv.comment}</div>` : ''}
+              </div>`).join('')}
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--err);padding:1rem">불러오기 실패: ' + e.message + '</div>';
+  }
+}
+
+function toggleReviews(id) { document.getElementById('reviews-' + id).classList.toggle('show'); }
+function showAddRestaurant() { document.getElementById('addRestaurantModal').classList.add('show'); }
+function showReview(id) {
+  currentReviewId = id; currentStar = 0; setStar(0);
+  document.getElementById('reviewNick').value = '';
+  document.getElementById('reviewComment').value = '';
+  document.getElementById('addReviewModal').classList.add('show');
+}
+function showDelete(id) {
+  currentDeleteId = id;
+  document.getElementById('deletePw').value = '';
+  document.getElementById('deleteErr').style.display = 'none';
+  document.getElementById('deleteModal').classList.add('show');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function setStar(n) { currentStar = n; document.querySelectorAll('.star-btn').forEach((s, i) => s.classList.toggle('on', i < n)); }
+
+async function addRestaurant() {
+  const name = document.getElementById('rName').value.trim();
+  if (!name) { alert('식당 이름을 입력해주세요'); return; }
+  const menusRaw = document.getElementById('rMenus').value.trim();
+  const menus = menusRaw ? menusRaw.split(',').map(m => m.trim()).filter(Boolean) : [];
+  try {
+    await fetch(WORKER_URL + '/test_restaurants', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, category: document.getElementById('rCategory').value, address: document.getElementById('rAddress').value.trim(), menus })
+    });
+    closeModal('addRestaurantModal');
+    document.getElementById('rName').value = '';
+    document.getElementById('rAddress').value = '';
+    document.getElementById('rMenus').value = '';
+    loadRestaurants();
+  } catch(e) { alert('오류: ' + e.message); }
+}
+
+async function submitReview() {
+  if (!currentStar) { alert('별점을 선택해주세요'); return; }
+  try {
+    await fetch(WORKER_URL + '/test_restaurants/review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: currentReviewId, score: currentStar, comment: document.getElementById('reviewComment').value.trim(), nickname: document.getElementById('reviewNick').value.trim() || '익명' })
+    });
+    closeModal('addReviewModal');
+    loadRestaurants();
+  } catch(e) { alert('오류: ' + e.message); }
+}
+
+async function confirmDelete() {
+  const pw = document.getElementById('deletePw').value;
+  try {
+    const resp = await fetch(WORKER_URL + '/test_restaurants', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Password': pw },
+      body: JSON.stringify({ id: currentDeleteId })
+    });
+    const data = await resp.json();
+    if (resp.status === 401) { document.getElementById('deleteErr').style.display = 'block'; return; }
+    closeModal('deleteModal');
+    loadRestaurants();
+  } catch(e) { alert('오류: ' + e.message); }
+}
+
+loadWeather();
+loadRestaurants();
+</script>
+</body>
+</html>
