@@ -75,6 +75,13 @@
   .notice-title { font-size: 12px; font-weight: 700; color: #92400E; margin-bottom: 8px; }
   .notice-text { font-size: 14px; color: #78350F; line-height: 1.6; white-space: pre-wrap; background: white; border-radius: 10px; padding: 12px 14px; border: 1px solid #FDE68A; }
 
+  /* 날씨 카드 */
+  .weather-card { margin: 0 1rem 1rem; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 14px; padding: 1rem 1.25rem; display: none; align-items: center; gap: 12px; }
+  .weather-card.show { display: flex; }
+  .weather-icon { font-size: 32px; flex-shrink: 0; }
+  .weather-info-text .w-main { font-size: 15px; font-weight: 700; color: #1D4ED8; }
+  .weather-info-text .w-sub { font-size: 12px; color: #3B82F6; margin-top: 2px; }
+
   .loading { text-align: center; padding: 3rem 1rem; color: var(--muted); }
   .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -83,12 +90,7 @@
   .no-data h3 { font-size: 16px; font-weight: 500; margin-bottom: 0.5rem; }
 
   /* 설치 배너 */
-  .install-banner {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-    background: white; border-top: 1px solid var(--border);
-    padding: 1rem 1.25rem; display: none;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
-  }
+  .install-banner { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: white; border-top: 1px solid var(--border); padding: 1rem 1.25rem; display: none; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); }
   .install-banner.show { display: block; }
   .install-banner-inner { display: flex; align-items: center; gap: 12px; }
   .install-banner-icon { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
@@ -99,12 +101,7 @@
   .install-banner-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; padding: 4px; flex-shrink: 0; }
 
   /* iOS 안내 */
-  .ios-guide {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-    background: white; border-top: 1px solid var(--border);
-    padding: 1.25rem; display: none;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
-  }
+  .ios-guide { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: white; border-top: 1px solid var(--border); padding: 1.25rem; display: none; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); }
   .ios-guide.show { display: block; }
   .ios-guide-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
   .ios-guide-steps { font-size: 13px; color: var(--muted); line-height: 2; }
@@ -112,12 +109,7 @@
   .ios-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); }
 
   /* 방문자 카운터 */
-  .visitor-bar {
-    display: flex; justify-content: center; gap: 24px;
-    padding: 10px; margin: 0 1rem 1rem;
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; 
-  }
+  .visitor-bar { display: flex; justify-content: center; gap: 24px; padding: 10px; margin: 0 1rem 1rem; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
   .visitor-item { text-align: center; }
   .visitor-label { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0.05em; }
   .visitor-count { font-size: 18px; font-weight: 700; color: var(--primary); margin-top: 2px; }
@@ -146,6 +138,39 @@
 <div class="day-bar" id="dayBar"></div>
 <div id="mainContent"><div class="loading"><div class="spinner"></div>불러오는 중...</div></div>
 
+<!-- 공지사항 -->
+<div class="notice-card" id="noticeCard">
+  <div class="notice-title">📢 공지사항</div>
+  <div class="notice-text" id="noticeText"></div>
+</div>
+
+<!-- 날씨 카드 -->
+<div class="weather-card" id="weatherCard">
+  <div class="weather-icon" id="weatherIcon">🌤</div>
+  <div class="weather-info-text">
+    <div class="w-main" id="weatherMain">날씨 불러오는 중...</div>
+    <div class="w-sub" id="weatherSub"></div>
+  </div>
+</div>
+
+<!-- 방문자 카운터 -->
+<div class="visitor-bar">
+  <div class="visitor-item">
+    <div class="visitor-label">TODAY</div>
+    <div class="visitor-count" id="visitToday">-</div>
+  </div>
+  <div style="width:1px;background:var(--border)"></div>
+  <div class="visitor-item">
+    <div class="visitor-label">TOTAL</div>
+    <div class="visitor-count" id="visitTotal">-</div>
+  </div>
+</div>
+
+<div class="footer">
+  <div style="margin-bottom:6px">Made by 홍보팀 · 이세웅</div>
+  <a href="admin.html">관리자 페이지</a>
+</div>
+
 <!-- 안드로이드 설치 배너 -->
 <div class="install-banner" id="installBanner">
   <div class="install-banner-inner">
@@ -172,30 +197,6 @@
   </div>
 </div>
 
-
-<div class="notice-card" id="noticeCard">
-  <div class="notice-title">📢 공지사항</div>
-  <div class="notice-text" id="noticeText"></div>
-</div>
-</div>
-
-<div class="visitor-bar">
-  <div class="visitor-item">
-    <div class="visitor-label">TODAY</div>
-    <div class="visitor-count" id="visitToday">-</div>
-  </div>
-  <div style="width:1px;background:var(--border)"></div>
-  <div class="visitor-item">
-    <div class="visitor-label">TOTAL</div>
-    <div class="visitor-count" id="visitTotal">-</div>
-  </div>
-</div>
-
-<div class="footer">
-  <div style="margin-bottom:6px">Made by 홍보팀 · 이세웅</div>
-  <a href="admin.html">관리자 페이지</a>
-</div>
-
 <script>
 const WORKER_URL = 'https://meal-worker.dltpcjsrnr.workers.dev';
 const MEAL_KOR = { b: '조식', l: '중식', d: '석식' };
@@ -204,7 +205,7 @@ const DAY_KOR = ['일','월','화','수','목','금','토'];
 let menuData = null;
 let selectedDay = null;
 let selectedMeal = 'l';
-let selectedOption = 0; // 선택식 인덱스
+let selectedOption = 0;
 let ratingsCache = {};
 let votedCache = {};
 
@@ -304,7 +305,6 @@ async function render() {
     el.innerHTML = `<div class="no-data"><div class="emoji">📋</div><h3>식단 정보 없음</h3><p style="font-size:13px;color:var(--muted);margin-top:4px">관리자 페이지에서 식단표를 업로드해주세요.</p></div>`;
     return;
   }
-
   const day = menuData.days.find(d => d.key === selectedDay);
   if (!day) { el.innerHTML = `<div class="no-data"><div class="emoji">📅</div><h3>해당 날짜 정보 없음</h3></div>`; return; }
 
@@ -315,11 +315,9 @@ async function render() {
   const badgeClass = { b: 'badge-b', l: 'badge-l', d: 'badge-d' }[selectedMeal];
   const icon = { b: '🌅', l: '☀️', d: '🌙' }[selectedMeal];
 
-  // 선택식 여부 확인
   const hasOptions = Array.isArray(mealData.options) && mealData.options.length > 1;
   const currentMeal = hasOptions ? mealData.options[selectedOption] : mealData;
 
-  // 선택식 탭
   const optionTabsHTML = hasOptions
     ? `<div class="option-tabs">${mealData.options.map((_, i) =>
         `<button class="option-tab${i === selectedOption ? ' active' : ''}" onclick="setOption(${i})">선택식 ${i + 1}</button>`
@@ -370,6 +368,43 @@ async function loadNotice() {
   } catch(e) {}
 }
 
+async function loadWeather() {
+  try {
+    const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 }));
+    const resp = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&current=temperature_2m,weathercode,windspeed_10m&timezone=Asia/Seoul`);
+    const data = await resp.json();
+    const temp = Math.round(data.current.temperature_2m);
+    const code = data.current.weathercode;
+    const wind = Math.round(data.current.windspeed_10m);
+    const weatherMap = {
+      0: { desc: '맑음', icon: '☀️' },
+      1: { desc: '대체로 맑음', icon: '🌤' },
+      2: { desc: '구름 조금', icon: '⛅' },
+      3: { desc: '흐림', icon: '☁️' },
+      45: { desc: '안개', icon: '🌫' },
+      48: { desc: '안개', icon: '🌫' },
+      51: { desc: '이슬비', icon: '🌦' },
+      61: { desc: '비', icon: '🌧' },
+      63: { desc: '비', icon: '🌧' },
+      65: { desc: '강한 비', icon: '🌧' },
+      71: { desc: '눈', icon: '🌨' },
+      73: { desc: '눈', icon: '🌨' },
+      80: { desc: '소나기', icon: '🌦' },
+      95: { desc: '뇌우', icon: '⛈' },
+    };
+    const w = weatherMap[code] || { desc: '흐림', icon: '☁️' };
+    document.getElementById('weatherCard').classList.add('show');
+    document.getElementById('weatherIcon').textContent = w.icon;
+    document.getElementById('weatherMain').textContent = `${temp}°C · ${w.desc}`;
+    document.getElementById('weatherSub').textContent = `바람 ${wind}km/h`;
+  } catch(e) {
+    document.getElementById('weatherCard').classList.add('show');
+    document.getElementById('weatherIcon').textContent = '🌤';
+    document.getElementById('weatherMain').textContent = '날씨 정보 없음';
+    document.getElementById('weatherSub').textContent = '위치 권한을 허용해주세요';
+  }
+}
+
 async function loadData() {
   try {
     const resp = await fetch(WORKER_URL + '/meal');
@@ -394,6 +429,19 @@ async function loadData() {
   loadNotice();
 }
 
+async function trackVisit() {
+  try {
+    const todayKST = new Date().toLocaleString('en-CA', { timeZone: 'Asia/Seoul' }).split(',')[0].trim();
+    const todayKey = 'visited_' + todayKST;
+    const visited = localStorage.getItem(todayKey);
+    const resp = await fetch(WORKER_URL + '/visit', { method: visited ? 'GET' : 'POST' });
+    const data = await resp.json();
+    if (!visited) localStorage.setItem(todayKey, '1');
+    document.getElementById('visitToday').textContent = data.today.toLocaleString();
+    document.getElementById('visitTotal').textContent = data.total.toLocaleString();
+  } catch(e) {}
+}
+
 // 서비스워커 등록
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -402,32 +450,25 @@ if ('serviceWorker' in navigator) {
 // 설치 배너 로직
 let deferredPrompt = null;
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-const isAndroid = /Android/.test(navigator.userAgent);
 const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 const bannerDismissed = localStorage.getItem('install_dismissed');
 
-// 안드로이드 — 브라우저 설치 이벤트
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  if (!isStandalone && !bannerDismissed) {
-    document.getElementById('installBanner').classList.add('show');
-  }
+  if (!isStandalone && !bannerDismissed) document.getElementById('installBanner').classList.add('show');
 });
 
 document.getElementById('installBtn')?.addEventListener('click', async () => {
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
+  await deferredPrompt.userChoice;
   deferredPrompt = null;
   closeBanner();
 });
 
-// iOS — 직접 안내
 if (isIOS && !isStandalone && !bannerDismissed) {
-  setTimeout(() => {
-    document.getElementById('iosGuide').classList.add('show');
-  }, 2000);
+  setTimeout(() => document.getElementById('iosGuide').classList.add('show'), 2000);
 }
 
 function closeBanner() {
@@ -440,40 +481,11 @@ function closeIos() {
   localStorage.setItem('install_dismissed', '1');
 }
 
-async function trackVisit() {
-  try {
-    // 오늘 이미 방문했으면 카운트 안 올림
-    const visitedToday = localStorage.getItem('visited_' + new Date().toISOString().split('T')[0]);
-    let data;
-    if (!visitedToday) {
-      const resp = await fetch(WORKER_URL + '/visit', { method: 'POST' });
-      data = await resp.json();
-      localStorage.setItem('visited_' + new Date().toISOString().split('T')[0], '1');
-    } else {
-      const resp = await fetch(WORKER_URL + '/visit');
-      data = await resp.json();
-    }
-    document.getElementById('visitToday').textContent = data.today.toLocaleString();
-    document.getElementById('visitTotal').textContent = data.total.toLocaleString();
-  } catch(e) {}
-}
-
 tick();
 setInterval(tick, 10000);
 loadData();
 trackVisit();
-  async function trackVisit() {
-  try {
-    const today = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }).split('.').slice(0, 3).map((v, i) => i === 0 ? v.trim() : v.trim().padStart(2, '0')).join('-');
-const todayKey = 'visited_' + today;
-    const visited = localStorage.getItem(todayKey);
-    const resp = await fetch(WORKER_URL + '/visit', { method: visited ? 'GET' : 'POST' });
-    const data = await resp.json();
-    if (!visited) localStorage.setItem(todayKey, '1');
-    document.getElementById('visitToday').textContent = data.today.toLocaleString();
-    document.getElementById('visitTotal').textContent = data.total.toLocaleString();
-  } catch(e) {}
-}
+loadWeather();
 </script>
 </body>
 </html>
