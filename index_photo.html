@@ -529,6 +529,7 @@ function closeIos() {
 
 // ── 식단 사진 ────────────────────────────────────────
 let currentPhotoKey = '';
+let photoCache = {};
 
 function getPhotoKey() {
   const todayKST = new Date().toLocaleString('en-CA', { timeZone: 'Asia/Seoul' }).split(',')[0].trim();
@@ -541,10 +542,19 @@ async function loadPhoto() {
   currentPhotoKey = key;
   const area = document.getElementById('photoArea');
   if (!area) return;
+
+  // 캐시에 있으면 바로 표시
+  if (photoCache[key]) {
+    const src = `data:image/jpeg;base64,${photoCache[key]}`;
+    area.innerHTML = `<img class="meal-photo" src="${src}" onclick="openPhotoModal('${src}')" alt="식단 사진">`;
+    return;
+  }
+
   try {
     const resp = await fetch(WORKER_URL + '/photo?key=' + encodeURIComponent(key));
     const data = await resp.json();
     if (data.photo) {
+      photoCache[key] = data.photo;
       const src = `data:image/jpeg;base64,${data.photo}`;
       area.innerHTML = `<img class="meal-photo" src="${src}" onclick="openPhotoModal('${src}')" alt="식단 사진">`;
     } else {
@@ -576,6 +586,7 @@ async function onPhotoSelected(e) {
       body: JSON.stringify({ key: currentPhotoKey, imageBase64: compressed })
     });
     // 업로드 후 photoArea만 업데이트 (render 재실행 없이)
+    photoCache[currentPhotoKey] = compressed;
     const src = `data:image/jpeg;base64,${compressed}`;
     if (area) area.innerHTML = `<img class="meal-photo" src="${src}" onclick="openPhotoModal('${src}')" alt="식단 사진">`;
   } catch(e) {
