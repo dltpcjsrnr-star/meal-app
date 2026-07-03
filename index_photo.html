@@ -395,7 +395,9 @@ async function render() {
   const key = ratingKey(selectedOption);
   const ratings = await loadRatings(key);
   updateVoteButtons(ratings, votedCache[key] || null);
-  loadPhoto();
+
+  // render 완료 후 사진 로드 (photoArea가 생성된 후)
+  setTimeout(() => loadPhoto(), 0);
 }
 
 async function loadNotice() {
@@ -543,9 +545,14 @@ async function loadPhoto() {
     const resp = await fetch(WORKER_URL + '/photo?key=' + encodeURIComponent(key));
     const data = await resp.json();
     if (data.photo) {
-      area.innerHTML = `<img class="meal-photo" src="data:image/jpeg;base64,${data.photo}" onclick="openPhotoModal(this.src)" alt="식단 사진">`;
+      const src = `data:image/jpeg;base64,${data.photo}`;
+      area.innerHTML = `<img class="meal-photo" src="${src}" onclick="openPhotoModal('${src}')" alt="식단 사진">`;
+    } else {
+      area.innerHTML = `<div class="photo-upload-btn" onclick="openCamera()"><span class="cam-icon">📷</span><span>사진 올리기</span></div>`;
     }
-  } catch(e) {}
+  } catch(e) {
+    area.innerHTML = `<div class="photo-upload-btn" onclick="openCamera()"><span class="cam-icon">📷</span><span>사진 올리기</span></div>`;
+  }
 }
 
 function openCamera() {
@@ -568,7 +575,9 @@ async function onPhotoSelected(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key: currentPhotoKey, imageBase64: compressed })
     });
-    if (area) area.innerHTML = `<img class="meal-photo" src="data:image/jpeg;base64,${compressed}" onclick="openPhotoModal(this.src)" alt="식단 사진">`;
+    // 업로드 후 photoArea만 업데이트 (render 재실행 없이)
+    const src = `data:image/jpeg;base64,${compressed}`;
+    if (area) area.innerHTML = `<img class="meal-photo" src="${src}" onclick="openPhotoModal('${src}')" alt="식단 사진">`;
   } catch(e) {
     if (area) area.innerHTML = `<div class="photo-upload-btn" onclick="openCamera()"><span class="cam-icon">📷</span><span>다시 시도</span></div>`;
   }
