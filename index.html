@@ -1,1 +1,491 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>성.직.전</title>
+<link rel="apple-touch-icon" href="icon.jpg">
+<link rel="icon" href="icon.jpg">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="성.직.전">
+<meta name="theme-color" content="#0b2d85">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F4EF; --card: #fff; --primary: #0b2d85; --primary-light: #1a4ab5;
+    --accent: #E8732A; --accent-light: #FDF0E8; --text: #1A1A1A; --muted: #6B6B6B;
+    --border: #E8E3DA; --blue: #3B82F6; --purple: #7C3AED;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 3rem; }
 
+  .header { background: var(--primary); color: white; padding: 1.25rem 1.25rem 1.5rem; position: sticky; top: 0; z-index: 10; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header .sub { font-size: 12px; opacity: 0.65; margin-top: 3px; }
+  .live-time { font-size: 13px; background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; }
+
+  .meal-tabs { display: flex; gap: 8px; }
+  .meal-tab { flex: 1; padding: 8px 4px; border: none; border-radius: 10px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.6); transition: all 0.2s; }
+  .meal-tab.active { background: white; color: var(--primary); }
+  .meal-tab span { display: block; font-size: 16px; margin-bottom: 2px; }
+
+  .day-bar { background: white; border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; scrollbar-width: none; padding: 0 0.75rem; position: sticky; top: 0; z-index: 9; }
+  .day-bar::-webkit-scrollbar { display: none; }
+  .day-btn { flex-shrink: 0; padding: 12px 14px; border: none; background: none; font-family: inherit; font-size: 13px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .day-btn b { display: block; font-size: 15px; font-weight: 700; }
+  .day-btn small { display: block; font-size: 11px; margin-top: 1px; }
+  .day-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .day-btn.today b::after { content: ''; display: inline-block; width: 4px; height: 4px; background: var(--accent); border-radius: 50%; margin-left: 4px; vertical-align: middle; }
+
+  .content { padding: 1rem; }
+
+  /* 선택식 탭 */
+  .option-tabs { display: flex; gap: 8px; margin-bottom: 0.75rem; }
+  .option-tab { padding: 7px 18px; border: 1.5px solid var(--border); border-radius: 20px; background: var(--card); font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--muted); transition: all 0.15s; }
+  .option-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+  .main-card { background: var(--primary); color: white; border-radius: 16px; padding: 1.25rem; margin-bottom: 0.75rem; position: relative; overflow: hidden; }
+  .main-card::before { content: ''; position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.06); border-radius: 50%; }
+  .main-label { font-size: 11px; opacity: 0.6; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .main-name { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .main-origin { font-size: 12px; opacity: 0.55; }
+  .meal-badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 1rem; }
+  .badge-b { background: #EFF6FF; color: var(--blue); }
+  .badge-l { background: var(--accent-light); color: var(--accent); }
+  .badge-d { background: #F5F3FF; color: var(--purple); }
+
+  .rating-box { display: flex; gap: 10px; margin-top: 12px; }
+  .vote-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px; border: 1.5px solid rgba(255,255,255,0.25); border-radius: 10px; background: rgba(255,255,255,0.1); color: white; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+  .vote-btn:hover { background: rgba(255,255,255,0.2); }
+  .vote-btn.voted-good { background: rgba(255,255,255,0.9); color: #16A34A; border-color: transparent; }
+  .vote-btn.voted-bad { background: rgba(255,255,255,0.9); color: #DC2626; border-color: transparent; }
+  .vote-btn .count { font-size: 13px; font-weight: 700; }
+
+  .plus-card { background: #F0FAF0; border: 1px solid #BBE3BB; border-radius: 12px; padding: 10px 14px; margin-bottom: 0.75rem; font-size: 13px; color: #2D6A2D; }
+  .sides-label { font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
+  .sides-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .side-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.4; }
+  .side-item.k { border-left: 3px solid var(--accent); }
+
+  .notice-card { margin: 0 1rem 1rem; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 14px; padding: 1.25rem; display: none; }
+  .notice-card.show { display: block; }
+  .notice-title { font-size: 12px; font-weight: 700; color: #92400E; margin-bottom: 8px; }
+  .notice-text { font-size: 14px; color: #78350F; line-height: 1.6; white-space: pre-wrap; background: white; border-radius: 10px; padding: 12px 14px; border: 1px solid #FDE68A; }
+
+  /* 날씨 카드 */
+  .weather-card { margin: 0 1rem 1rem; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 14px; padding: 0.6rem 1rem; display: none; align-items: center; gap: 12px; }
+  .weather-card.show { display: flex; }
+  .weather-icon { font-size: 32px; flex-shrink: 0; }
+  .weather-info-text .w-main { font-size: 15px; font-weight: 700; color: #1D4ED8; }
+  .weather-info-text .w-sub { font-size: 12px; color: #3B82F6; margin-top: 2px; }
+
+  .loading { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+  .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .no-data { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+  .no-data .emoji { font-size: 40px; margin-bottom: 1rem; }
+  .no-data h3 { font-size: 16px; font-weight: 500; margin-bottom: 0.5rem; }
+
+  /* 설치 배너 */
+  .install-banner { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: white; border-top: 1px solid var(--border); padding: 1rem 1.25rem; display: none; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); }
+  .install-banner.show { display: block; }
+  .install-banner-inner { display: flex; align-items: center; gap: 12px; }
+  .install-banner-icon { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+  .install-banner-text { flex: 1; }
+  .install-banner-text strong { display: block; font-size: 14px; font-weight: 700; }
+  .install-banner-text span { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .install-banner-btn { background: var(--primary); color: white; border: none; border-radius: 10px; padding: 8px 16px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+  .install-banner-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; padding: 4px; flex-shrink: 0; }
+
+  /* iOS 안내 */
+  .ios-guide { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: white; border-top: 1px solid var(--border); padding: 1.25rem; display: none; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); }
+  .ios-guide.show { display: block; }
+  .ios-guide-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+  .ios-guide-steps { font-size: 13px; color: var(--muted); line-height: 2; }
+  .ios-guide-steps b { color: var(--text); }
+  .ios-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); }
+
+  /* 방문자 카운터 */
+  .visitor-bar { display: flex; justify-content: center; gap: 24px; padding: 10px; margin: 0 1rem 1rem; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+  .visitor-item { text-align: center; }
+  .visitor-label { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0.05em; }
+  .visitor-count { font-size: 18px; font-weight: 700; color: var(--primary); margin-top: 2px; }
+
+  .footer { text-align: center; padding: 1rem; font-size: 12px; color: var(--muted); padding-bottom: 5rem; }
+  .footer a { color: var(--primary-light); text-decoration: none; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>🍽 성빈센트 이번 주 식단</h1>
+      <div class="sub" id="headerDate">-</div>
+    </div>
+    <div class="live-time" id="liveTime">--:--</div>
+  </div>
+  <div class="meal-tabs">
+    <button class="meal-tab" id="tab-b" onclick="setMeal('b')"><span>🌅</span>조식</button>
+    <button class="meal-tab" id="tab-l" onclick="setMeal('l')"><span>☀️</span>중식</button>
+    <button class="meal-tab" id="tab-d" onclick="setMeal('d')"><span>🌙</span>석식</button>
+  </div>
+</div>
+
+<div class="day-bar" id="dayBar"></div>
+<div id="mainContent"><div class="loading"><div class="spinner"></div>불러오는 중...</div></div>
+
+<!-- 공지사항 -->
+<div class="notice-card" id="noticeCard">
+  <div class="notice-title">📢 공지사항</div>
+  <div class="notice-text" id="noticeText"></div>
+</div>
+
+<!-- 날씨 카드 -->
+<div class="weather-card" id="weatherCard">
+  <div class="weather-icon" id="weatherIcon">🌤</div>
+  <div class="weather-info-text">
+    <div class="w-main" id="weatherMain">날씨 불러오는 중...</div>
+    <div class="w-sub" id="weatherSub"></div>
+  </div>
+</div>
+
+<!-- 방문자 카운터 -->
+<div class="visitor-bar">
+  <div class="visitor-item">
+    <div class="visitor-label">TODAY</div>
+    <div class="visitor-count" id="visitToday">-</div>
+  </div>
+  <div style="width:1px;background:var(--border)"></div>
+  <div class="visitor-item">
+    <div class="visitor-label">TOTAL</div>
+    <div class="visitor-count" id="visitTotal">-</div>
+  </div>
+</div>
+
+<div class="footer">
+  <div style="margin-bottom:6px">Made by 홍보팀 · 이세웅</div>
+  <a href="admin.html">관리자 페이지</a>
+</div>
+
+<!-- 안드로이드 설치 배너 -->
+<div class="install-banner" id="installBanner">
+  <div class="install-banner-inner">
+    <img src="icon.jpg" class="install-banner-icon" alt="아이콘">
+    <div class="install-banner-text">
+      <strong>홈화면에 추가하기</strong>
+      <span>앱처럼 빠르게 식단을 확인하세요</span>
+    </div>
+    <button class="install-banner-btn" id="installBtn">추가</button>
+    <button class="install-banner-close" onclick="closeBanner()">✕</button>
+  </div>
+</div>
+
+<!-- iOS 안내 배너 -->
+<div class="ios-guide" id="iosGuide">
+  <div class="ios-guide-title">
+    📱 홈화면에 추가하는 방법
+    <button class="ios-close" onclick="closeIos()">✕</button>
+  </div>
+  <div class="ios-guide-steps">
+    1. 하단 <b>공유 버튼 (□↑)</b> 탭하기<br>
+    2. <b>'홈 화면에 추가'</b> 선택<br>
+    3. 오른쪽 상단 <b>'추가'</b> 탭하기
+  </div>
+</div>
+
+<script>
+const WORKER_URL = 'https://meal-worker.dltpcjsrnr.workers.dev';
+const MEAL_KOR = { b: '조식', l: '중식', d: '석식' };
+const DAY_KOR = ['일','월','화','수','목','금','토'];
+
+let menuData = null;
+let selectedDay = null;
+let selectedMeal = 'l';
+let selectedOption = 0;
+let ratingsCache = {};
+let votedCache = {};
+
+function getMeal(h) { return h < 10 ? 'b' : h < 15 ? 'l' : 'd'; }
+function today() { return DAY_KOR[new Date().getDay()]; }
+
+function tick() {
+  const n = new Date();
+  document.getElementById('liveTime').textContent = n.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('headerDate').textContent = n.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
+}
+
+function setMeal(m) {
+  selectedMeal = m;
+  selectedOption = 0;
+  document.querySelectorAll('.meal-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + m).classList.add('active');
+  render();
+}
+
+function setDay(key, scroll = false) {
+  selectedDay = key;
+  selectedOption = 0;
+  document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('day-' + key);
+  if (btn) {
+    btn.classList.add('active');
+    if (scroll) btn.scrollIntoView({ inline: 'center', behavior: 'smooth' });
+  }
+  render();
+}
+
+function setOption(idx) {
+  selectedOption = idx;
+  render();
+}
+
+function buildDayBar(days) {
+  const bar = document.getElementById('dayBar');
+  bar.innerHTML = '';
+  const t = today();
+  days.forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = 'day-btn' + (d.key === t ? ' today' : '');
+    btn.id = 'day-' + d.key;
+    btn.innerHTML = `<b>${d.key}</b><small>${d.date || ''}</small>`;
+    btn.onclick = () => setDay(d.key, false);
+    bar.appendChild(btn);
+  });
+}
+
+function ratingKey(optIdx) {
+  return selectedDay + '_' + MEAL_KOR[selectedMeal] + (optIdx > 0 ? '_' + optIdx : '');
+}
+
+async function loadRatings(key) {
+  if (ratingsCache[key]) return ratingsCache[key];
+  try {
+    const resp = await fetch(WORKER_URL + '/ratings?key=' + encodeURIComponent(key));
+    const data = await resp.json();
+    ratingsCache[key] = data;
+    return data;
+  } catch(e) { return { good: 0, bad: 0 }; }
+}
+
+async function vote(type) {
+  const key = ratingKey(selectedOption);
+  if (votedCache[key]) return;
+  try {
+    const resp = await fetch(WORKER_URL + '/vote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, type })
+    });
+    const data = await resp.json();
+    ratingsCache[key] = data;
+    votedCache[key] = type;
+    updateVoteButtons(data, type);
+  } catch(e) {}
+}
+
+function updateVoteButtons(ratings, voted) {
+  const goodBtn = document.getElementById('vote-good');
+  const badBtn = document.getElementById('vote-bad');
+  if (!goodBtn || !badBtn) return;
+  goodBtn.querySelector('.count').textContent = ratings.good;
+  badBtn.querySelector('.count').textContent = ratings.bad;
+  goodBtn.classList.toggle('voted-good', voted === 'good');
+  badBtn.classList.toggle('voted-bad', voted === 'bad');
+  goodBtn.disabled = !!voted;
+  badBtn.disabled = !!voted;
+}
+
+async function render() {
+  const el = document.getElementById('mainContent');
+  if (!menuData?.days?.length) {
+    el.innerHTML = `<div class="no-data"><div class="emoji">📋</div><h3>식단 정보 없음</h3><p style="font-size:13px;color:var(--muted);margin-top:4px">관리자 페이지에서 식단표를 업로드해주세요.</p></div>`;
+    return;
+  }
+  const day = menuData.days.find(d => d.key === selectedDay);
+  if (!day) { el.innerHTML = `<div class="no-data"><div class="emoji">📅</div><h3>해당 날짜 정보 없음</h3></div>`; return; }
+
+  const mealKor = MEAL_KOR[selectedMeal];
+  const mealData = day[mealKor];
+  if (!mealData) { el.innerHTML = `<div class="no-data"><div class="emoji">🚫</div><h3>${mealKor} 정보가 없습니다</h3></div>`; return; }
+
+  const badgeClass = { b: 'badge-b', l: 'badge-l', d: 'badge-d' }[selectedMeal];
+  const icon = { b: '🌅', l: '☀️', d: '🌙' }[selectedMeal];
+
+  const hasOptions = Array.isArray(mealData.options) && mealData.options.length > 1;
+  const currentMeal = hasOptions ? mealData.options[selectedOption] : mealData;
+
+  const optionTabsHTML = hasOptions
+    ? `<div class="option-tabs">${mealData.options.map((_, i) =>
+        `<button class="option-tab${i === selectedOption ? ' active' : ''}" onclick="setOption(${i})">선택식 ${i + 1}</button>`
+      ).join('')}</div>`
+    : '';
+
+  const plusHTML = (selectedMeal === 'l' && mealData.plus) ? `<div class="plus-card">➕ <strong>PLUS 코너:</strong> ${mealData.plus}</div>` : '';
+  const sidesHTML = (currentMeal.sides || []).map(s => {
+    const k = /김치|깍두기|석박지|열무/.test(s);
+    return `<div class="side-item${k ? ' k' : ''}">${s}</div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="content">
+      <div class="meal-badge ${badgeClass}">${icon} ${mealKor}</div>
+      ${optionTabsHTML}
+      <div class="main-card">
+        <div class="main-label">메인 요리</div>
+        <div class="main-name">${currentMeal.main || '-'}</div>
+        ${currentMeal.origin ? `<div class="main-origin">원산지: ${currentMeal.origin}</div>` : ''}
+        <div class="rating-box">
+          <button class="vote-btn" id="vote-good" onclick="vote('good')">👍 맛있어요 <span class="count">-</span></button>
+          <button class="vote-btn" id="vote-bad" onclick="vote('bad')">👎 별로예요 <span class="count">-</span></button>
+        </div>
+      </div>
+      ${plusHTML}
+      <div class="sides-label">반찬</div>
+      <div class="sides-grid">${sidesHTML}</div>
+    </div>
+  `;
+
+  const key = ratingKey(selectedOption);
+  const ratings = await loadRatings(key);
+  updateVoteButtons(ratings, votedCache[key] || null);
+}
+
+async function loadNotice() {
+  try {
+    const resp = await fetch(WORKER_URL + '/notice');
+    const data = await resp.json();
+    const card = document.getElementById('noticeCard');
+    if (data.notice && data.notice.trim()) {
+      document.getElementById('noticeText').textContent = data.notice;
+      card.classList.add('show');
+    } else {
+      card.classList.remove('show');
+    }
+  } catch(e) {}
+}
+
+async function loadWeather() {
+  try {
+    const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 }));
+    const resp = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&current=temperature_2m,weathercode,windspeed_10m&timezone=Asia/Seoul`);
+    const data = await resp.json();
+    const temp = Math.round(data.current.temperature_2m);
+    const code = data.current.weathercode;
+    const wind = Math.round(data.current.windspeed_10m);
+    const weatherMap = {
+      0: { desc: '맑음', icon: '☀️' },
+      1: { desc: '대체로 맑음', icon: '🌤' },
+      2: { desc: '구름 조금', icon: '⛅' },
+      3: { desc: '흐림', icon: '☁️' },
+      45: { desc: '안개', icon: '🌫' },
+      48: { desc: '안개', icon: '🌫' },
+      51: { desc: '이슬비', icon: '🌦' },
+      61: { desc: '비', icon: '🌧' },
+      63: { desc: '비', icon: '🌧' },
+      65: { desc: '강한 비', icon: '🌧' },
+      71: { desc: '눈', icon: '🌨' },
+      73: { desc: '눈', icon: '🌨' },
+      80: { desc: '소나기', icon: '🌦' },
+      95: { desc: '뇌우', icon: '⛈' },
+    };
+    const w = weatherMap[code] || { desc: '흐림', icon: '☁️' };
+    document.getElementById('weatherCard').classList.add('show');
+    document.getElementById('weatherIcon').textContent = w.icon;
+    document.getElementById('weatherMain').textContent = `${temp}°C · ${w.desc}`;
+    document.getElementById('weatherSub').textContent = `바람 ${wind}km/h`;
+  } catch(e) {
+    document.getElementById('weatherCard').classList.add('show');
+    document.getElementById('weatherIcon').textContent = '🌤';
+    document.getElementById('weatherMain').textContent = '날씨 정보 없음';
+    document.getElementById('weatherSub').textContent = '위치 권한을 허용해주세요';
+  }
+}
+
+async function loadData() {
+  try {
+    const resp = await fetch(WORKER_URL + '/meal');
+    if (resp.status !== 404) { const d = await resp.json(); menuData = d.error ? null : d; }
+  } catch(e) { menuData = null; }
+
+  const n = new Date();
+  const t = today();
+  selectedMeal = getMeal(n.getHours());
+
+  if (menuData?.days?.length) {
+    buildDayBar(menuData.days);
+    const td = menuData.days.find(d => d.key === t);
+    selectedDay = td ? td.key : menuData.days[0].key;
+  } else {
+    selectedDay = t;
+    document.getElementById('dayBar').innerHTML = '';
+  }
+
+  setMeal(selectedMeal);
+  setDay(selectedDay, true);
+  loadNotice();
+}
+
+async function trackVisit() {
+  try {
+    const todayKST = new Date().toLocaleString('en-CA', { timeZone: 'Asia/Seoul' }).split(',')[0].trim();
+    const todayKey = 'visited_' + todayKST;
+    const visited = localStorage.getItem(todayKey);
+    const resp = await fetch(WORKER_URL + '/visit', { method: visited ? 'GET' : 'POST' });
+    const data = await resp.json();
+    if (!visited) localStorage.setItem(todayKey, '1');
+    document.getElementById('visitToday').textContent = data.today.toLocaleString();
+    document.getElementById('visitTotal').textContent = data.total.toLocaleString();
+  } catch(e) {}
+}
+
+// 서비스워커 등록
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+// 설치 배너 로직
+let deferredPrompt = null;
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+const bannerDismissed = localStorage.getItem('install_dismissed');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (!isStandalone && !bannerDismissed) document.getElementById('installBanner').classList.add('show');
+});
+
+document.getElementById('installBtn')?.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  closeBanner();
+});
+
+if (isIOS && !isStandalone && !bannerDismissed) {
+  setTimeout(() => document.getElementById('iosGuide').classList.add('show'), 2000);
+}
+
+function closeBanner() {
+  document.getElementById('installBanner').classList.remove('show');
+  localStorage.setItem('install_dismissed', '1');
+}
+
+function closeIos() {
+  document.getElementById('iosGuide').classList.remove('show');
+  localStorage.setItem('install_dismissed', '1');
+}
+
+tick();
+setInterval(tick, 10000);
+loadData();
+trackVisit();
+loadWeather();
+</script>
+</body>
+</html>
