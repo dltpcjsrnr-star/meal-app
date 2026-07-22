@@ -251,8 +251,15 @@ async function analyzeFile() {
   if (!isUnlocked) { alert('먼저 관리자 인증을 해주세요.'); return; }
   if (!selectedFile) { setStatus('error', '파일을 선택해주세요.'); return; }
 
-  document.getElementById('analyzeBtn').disabled = true;
+document.getElementById('analyzeBtn').disabled = true;
   document.getElementById('resultCard').style.display = 'none';
+  setStatus('loading', '분석 준비 중...');
+  setProgress(10);
+
+  // Worker 워밍업
+  await fetch(WORKER_URL + '/meal').catch(() => {});
+  await new Promise(r => setTimeout(r, 1000));
+
   setStatus('loading', '파일을 분석하는 중입니다... (20~40초 소요)');
   setProgress(20);
 
