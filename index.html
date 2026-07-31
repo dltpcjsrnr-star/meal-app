@@ -360,7 +360,6 @@ async function render() {
   const mealData = day[mealKor];
   if (!mealData) { el.innerHTML = `<div class="no-data"><div class="emoji">🚫</div><h3>${mealKor} 정보가 없습니다</h3></div>`; return; }
 
-  <div class="meal-badge ${badgeClass}">${icon} ${mealKor}</div>
 
   const hasOptions = Array.isArray(mealData.options) && mealData.options.length > 1;
   const currentMeal = hasOptions ? mealData.options[selectedOption] : mealData;
@@ -501,7 +500,9 @@ async function loadData() {
   }
 
   setMeal(selectedMeal);
-  setDay(selectedDay, true);
+setDay(selectedDay, false);
+// 초기 로딩 시 페이지 최상단으로
+window.scrollTo(0, 0);
   loadNotice();
 }
 
