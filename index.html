@@ -53,9 +53,7 @@
   .main-name { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
   .main-origin { font-size: 12px; opacity: 0.55; }
   .meal-badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 1rem; }
-  .badge-b { background: #EFF6FF; color: var(--blue); }
-  .badge-l { background: var(--accent-light); color: var(--accent); }
-  .badge-d { background: #F5F3FF; color: var(--purple); }
+
 
   .rating-box { display: flex; gap: 10px; margin-top: 12px; }
   .vote-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px; border: 1.5px solid rgba(255,255,255,0.25); border-radius: 10px; background: rgba(255,255,255,0.1); color: white; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
@@ -378,7 +376,7 @@ async function render() {
 
   el.innerHTML = `
     <div class="content">
-      <div class="meal-badge ${badgeClass}">${icon} ${mealKor}</div>
+  
       ${optionTabsHTML}
       <div class="main-card">
         <div class="main-card-inner">
