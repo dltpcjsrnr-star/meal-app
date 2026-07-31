@@ -360,8 +360,7 @@ async function render() {
   const mealData = day[mealKor];
   if (!mealData) { el.innerHTML = `<div class="no-data"><div class="emoji">🚫</div><h3>${mealKor} 정보가 없습니다</h3></div>`; return; }
 
-  const badgeClass = { b: 'badge-b', l: 'badge-l', d: 'badge-d' }[selectedMeal];
-  const icon = { b: '🌅', l: '☀️', d: '🌙' }[selectedMeal];
+  <div class="meal-badge ${badgeClass}">${icon} ${mealKor}</div>
 
   const hasOptions = Array.isArray(mealData.options) && mealData.options.length > 1;
   const currentMeal = hasOptions ? mealData.options[selectedOption] : mealData;
