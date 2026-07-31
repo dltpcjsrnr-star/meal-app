@@ -375,10 +375,10 @@ async function render() {
             ${currentMeal.origin ? `<div class="main-origin">원산지: ${currentMeal.origin}</div>` : ''}
           </div>
           <div class="photo-area" id="photoArea">
-            <div class="photo-upload-btn" onclick="openCamera()">
+            <button class="photo-upload-btn" onclick="openCamera()" type="button">
               <span class="cam-icon">📷</span>
               <span>사진 올리기</span>
-            </div>
+            </button>
           </div>
         </div>
         <div class="rating-box">
@@ -396,8 +396,19 @@ async function render() {
   const ratings = await loadRatings(key);
   updateVoteButtons(ratings, votedCache[key] || null);
 
-  // render 완료 후 사진 로드 (photoArea가 생성된 후)
-  setTimeout(() => loadPhoto(), 0);
+  // 캐시에 있으면 바로 표시, 없으면 로드
+  const photoKey = getPhotoKey();
+  currentPhotoKey = photoKey;
+  const area = document.getElementById('photoArea');
+  if (area) {
+    if (photoCache[photoKey]) {
+      const src = `data:image/jpeg;base64,${photoCache[photoKey]}`;
+      area.innerHTML = `<img class="meal-photo" src="${src}" onclick="openPhotoModal('${src}')" alt="식단 사진">`;
+    } else {
+      // 백그라운드에서 로드 (photoArea 참조 유지)
+      loadPhotoIntoArea(photoKey, area);
+    }
+  }
 }
 
 async function loadNotice() {
@@ -537,36 +548,30 @@ function getPhotoKey() {
   return `${todayKST}_${mealKor}`;
 }
 
-async function loadPhoto() {
-  const key = getPhotoKey();
-  currentPhotoKey = key;
-  const area = document.getElementById('photoArea');
-  if (!area) return;
-
-  // 캐시에 있으면 바로 표시
-  if (photoCache[key]) {
-    const src = `data:image/jpeg;base64,${photoCache[key]}`;
-    area.innerHTML = `<img class="meal-photo" src="${src}" onclick="openPhotoModal('${src}')" alt="식단 사진">`;
-    return;
-  }
-
+async function loadPhotoIntoArea(key, area) {
   try {
     const resp = await fetch(WORKER_URL + '/photo?key=' + encodeURIComponent(key));
     const data = await resp.json();
+    // area가 DOM에 아직 있는지 확인 (render가 다시 실행됐으면 무시)
+    if (!document.getElementById('photoArea')) return;
     if (data.photo) {
       photoCache[key] = data.photo;
       const src = `data:image/jpeg;base64,${data.photo}`;
       area.innerHTML = `<img class="meal-photo" src="${src}" onclick="openPhotoModal('${src}')" alt="식단 사진">`;
     } else {
-      area.innerHTML = `<div class="photo-upload-btn" onclick="openCamera()"><span class="cam-icon">📷</span><span>사진 올리기</span></div>`;
+      area.innerHTML = `<button class="photo-upload-btn" onclick="openCamera()" type="button"><span class="cam-icon">📷</span><span>사진 올리기</span></button>`;
     }
   } catch(e) {
-    area.innerHTML = `<div class="photo-upload-btn" onclick="openCamera()"><span class="cam-icon">📷</span><span>사진 올리기</span></div>`;
+    if (document.getElementById('photoArea')) {
+      area.innerHTML = `<button class="photo-upload-btn" onclick="openCamera()" type="button"><span class="cam-icon">📷</span><span>사진 올리기</span></button>`;
+    }
   }
 }
 
 function openCamera() {
-  document.getElementById('cameraInput').click();
+  const input = document.getElementById('cameraInput');
+  input.value = ''; // 초기화해서 같은 파일도 재선택 가능하게
+  input.click();
 }
 
 async function onPhotoSelected(e) {
@@ -574,23 +579,33 @@ async function onPhotoSelected(e) {
   if (!file) return;
   e.target.value = '';
 
-  // 압축 (최대 600px, 품질 0.6)
-  const compressed = await compressImage(file, 600, 0.6);
   const area = document.getElementById('photoArea');
-  if (area) area.innerHTML = `<div class="photo-upload-btn"><span class="cam-icon">⏳</span><span>업로드 중</span></div>`;
+  if (area) area.innerHTML = `<button class="photo-upload-btn" type="button"><span class="cam-icon">⏳</span><span>업로드 중</span></button>`;
 
   try {
+    // 압축 (최대 600px, 품질 0.6)
+    const compressed = await compressImage(file, 600, 0.6);
+
     await fetch(WORKER_URL + '/photo', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key: currentPhotoKey, imageBase64: compressed })
     });
-    // 업로드 후 photoArea만 업데이트 (render 재실행 없이)
+
+    // 캐시 업데이트
     photoCache[currentPhotoKey] = compressed;
     const src = `data:image/jpeg;base64,${compressed}`;
-    if (area) area.innerHTML = `<img class="meal-photo" src="${src}" onclick="openPhotoModal('${src}')" alt="식단 사진">`;
+
+    // DOM에 아직 있으면 업데이트
+    const currentArea = document.getElementById('photoArea');
+    if (currentArea) {
+      currentArea.innerHTML = `<img class="meal-photo" src="${src}" onclick="openPhotoModal('${src}')" alt="식단 사진">`;
+    }
   } catch(e) {
-    if (area) area.innerHTML = `<div class="photo-upload-btn" onclick="openCamera()"><span class="cam-icon">📷</span><span>다시 시도</span></div>`;
+    const currentArea = document.getElementById('photoArea');
+    if (currentArea) {
+      currentArea.innerHTML = `<button class="photo-upload-btn" onclick="openCamera()" type="button"><span class="cam-icon">📷</span><span>다시 시도</span></button>`;
+    }
   }
 }
 
