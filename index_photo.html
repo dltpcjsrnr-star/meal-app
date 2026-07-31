@@ -403,7 +403,13 @@ async function render() {
   if (area) {
     if (photoCache[photoKey]) {
       const src = `data:image/jpeg;base64,${photoCache[photoKey]}`;
-      area.innerHTML = `<img class="meal-photo" src="${src}" onclick="openPhotoModal('${src}')" alt="식단 사진">`;
+      const img1 = document.createElement('img');
+img1.className = 'meal-photo';
+img1.src = src;
+img1.alt = '식단 사진';
+img1.onclick = () => openPhotoModal(src);
+area.innerHTML = '';
+area.appendChild(img1);
     } else {
       // 백그라운드에서 로드 (photoArea 참조 유지)
       loadPhotoIntoArea(photoKey, area);
@@ -557,7 +563,13 @@ async function loadPhotoIntoArea(key, area) {
     if (data.photo) {
       photoCache[key] = data.photo;
       const src = `data:image/jpeg;base64,${data.photo}`;
-      area.innerHTML = `<img class="meal-photo" src="${src}" onclick="openPhotoModal('${src}')" alt="식단 사진">`;
+      const img2 = document.createElement('img');
+img2.className = 'meal-photo';
+img2.src = src;
+img2.alt = '식단 사진';
+img2.onclick = () => openPhotoModal(src);
+area.innerHTML = '';
+area.appendChild(img2);
     } else {
       area.innerHTML = `<button class="photo-upload-btn" onclick="openCamera()" type="button"><span class="cam-icon">📷</span><span>사진 올리기</span></button>`;
     }
@@ -599,7 +611,13 @@ async function onPhotoSelected(e) {
     // DOM에 아직 있으면 업데이트
     const currentArea = document.getElementById('photoArea');
     if (currentArea) {
-      currentArea.innerHTML = `<img class="meal-photo" src="${src}" onclick="openPhotoModal('${src}')" alt="식단 사진">`;
+      const img3 = document.createElement('img');
+img3.className = 'meal-photo';
+img3.src = src;
+img3.alt = '식단 사진';
+img3.onclick = () => openPhotoModal(src);
+currentArea.innerHTML = '';
+currentArea.appendChild(img3);
     }
   } catch(e) {
     const currentArea = document.getElementById('photoArea');
