@@ -114,11 +114,41 @@
   .visitor-label { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0.05em; }
   .visitor-count { font-size: 18px; font-weight: 700; color: var(--primary); margin-top: 2px; }
 
+  /* 공유하기 */
+  .share-btn { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 1rem 1rem; background: white; color: var(--primary); border: 1.5px solid var(--border); text-decoration: none; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; font-family: inherit; width: calc(100% - 2rem); -webkit-tap-highlight-color: transparent; }
+  .share-btn:active { background: var(--bg); }
+  .share-toast { position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.75); color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; z-index: 300; display: none; white-space: nowrap; }
+  .share-toast.show { display: block; }
+  .shortcut-btn { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 1rem 1rem; background: var(--primary); color: #fff; text-decoration: none; padding: 13px; border-radius: 12px; font-weight: 700; font-size: 14px; }
+  .shortcut-btn:active { background: var(--primary-light); }
   .footer { text-align: center; padding: 1rem; font-size: 12px; color: var(--muted); padding-bottom: 5rem; }
   .footer a { color: var(--primary-light); text-decoration: none; font-weight: 500; }
 
-  .shortcut-btn { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 1rem 1rem; background: var(--primary); color: #fff; text-decoration: none; padding: 13px; border-radius: 12px; font-weight: 700; font-size: 14px; }
-  .shortcut-btn:active { background: var(--primary-light); }
+  /* 식단 사진 */
+  .main-card-inner { display: flex; gap: 12px; align-items: flex-start; }
+  .main-card-text { flex: 1; min-width: 0; }
+  .photo-area { flex-shrink: 0; width: 80px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .photo-upload-btn {
+    width: 80px; height: 80px; border-radius: 12px;
+    border: 2px dashed rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.08);
+    color: white; cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 4px;
+    font-size: 11px; font-family: inherit; transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .photo-upload-btn:hover { background: rgba(255,255,255,0.15); }
+  .photo-upload-btn .cam-icon { font-size: 24px; }
+  .meal-photo {
+    width: 80px; height: 80px; border-radius: 12px;
+    object-fit: cover; cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.3);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .photo-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
+  .photo-modal.show { display: flex; }
+  .photo-modal img { max-width: 100%; max-height: 90vh; border-radius: 12px; object-fit: contain; }
+  .photo-modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 28px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -171,10 +201,23 @@
 
 <a href="https://dltpcjsrnr-star.github.io/bus-info/" class="shortcut-btn">🚌 버스 도착정보</a>
 
+<!-- 공유하기 -->
+<button class="share-btn" onclick="shareApp()">🔗 이번 주 식단 공유하기</button>
+<div class="share-toast" id="shareToast">링크가 복사되었습니다!</div>
+
 <div class="footer">
   <div style="margin-bottom:6px">Made by 홍보팀 · 이세웅</div>
   <a href="admin.html">관리자 페이지</a>
 </div>
+
+<!-- 사진 크게 보기 모달 -->
+<div class="photo-modal" id="photoModal" onclick="closePhotoModal()">
+  <button class="photo-modal-close">✕</button>
+  <img id="photoModalImg" src="" alt="식단 사진">
+</div>
+
+<!-- 카메라 입력 -->
+<input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="onPhotoSelected(event)">
 
 <!-- 안드로이드 설치 배너 -->
 <div class="install-banner" id="installBanner">
@@ -340,9 +383,19 @@ async function render() {
       <div class="meal-badge ${badgeClass}">${icon} ${mealKor}</div>
       ${optionTabsHTML}
       <div class="main-card">
-        <div class="main-label">메인 요리</div>
-        <div class="main-name">${currentMeal.main || '-'}</div>
-        ${currentMeal.origin ? `<div class="main-origin">원산지: ${currentMeal.origin}</div>` : ''}
+        <div class="main-card-inner">
+          <div class="main-card-text">
+            <div class="main-label">메인 요리</div>
+            <div class="main-name">${currentMeal.main || '-'}</div>
+            ${currentMeal.origin ? `<div class="main-origin">원산지: ${currentMeal.origin}</div>` : ''}
+          </div>
+          <div class="photo-area" id="photoArea">
+            <button class="photo-upload-btn" onclick="openCamera()" type="button">
+              <span class="cam-icon">📷</span>
+              <span>사진 올리기</span>
+            </button>
+          </div>
+        </div>
         <div class="rating-box">
           <button class="vote-btn" id="vote-good" onclick="vote('good')">👍 맛있어요 <span class="count">-</span></button>
           <button class="vote-btn" id="vote-bad" onclick="vote('bad')">👎 별로예요 <span class="count">-</span></button>
@@ -357,6 +410,25 @@ async function render() {
   const key = ratingKey(selectedOption);
   const ratings = await loadRatings(key);
   updateVoteButtons(ratings, votedCache[key] || null);
+
+  // 캐시에 있으면 바로 표시, 없으면 백그라운드 로드
+  const photoKey = getPhotoKey();
+  currentPhotoKey = photoKey;
+  const area = document.getElementById('photoArea');
+  if (area) {
+    if (photoCache[photoKey]) {
+      const src = `data:image/jpeg;base64,${photoCache[photoKey]}`;
+      const img = document.createElement('img');
+      img.className = 'meal-photo';
+      img.src = src;
+      img.alt = '식단 사진';
+      img.onclick = () => openPhotoModal(src);
+      area.innerHTML = '';
+      area.appendChild(img);
+    } else {
+      loadPhotoIntoArea(photoKey, area);
+    }
+  }
 }
 
 async function loadNotice() {
@@ -484,6 +556,147 @@ function closeBanner() {
 function closeIos() {
   document.getElementById('iosGuide').classList.remove('show');
   localStorage.setItem('install_dismissed', '1');
+}
+
+// ── 공유하기 ─────────────────────────────────────────
+async function shareApp() {
+  const url = 'https://dltpcjsrnr-star.github.io/meal-app/';
+  const title = '성빈센트 이번 주 식단';
+  const text = '성빈센트 병원 이번 주 식단을 확인해보세요!';
+
+  // 모바일 네이티브 공유 (카카오톡, 문자 등)
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, text, url });
+      return;
+    } catch(e) {
+      if (e.name === 'AbortError') return; // 사용자가 취소
+    }
+  }
+
+  // PC or 공유 API 미지원 → 링크 복사
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch(e) {
+    // clipboard API 실패 시 구형 방식
+    const el = document.createElement('textarea');
+    el.value = url;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+  }
+
+  // 복사 완료 토스트
+  const toast = document.getElementById('shareToast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// ── 식단 사진 ────────────────────────────────────────
+let currentPhotoKey = '';
+let photoCache = {};
+
+function getPhotoKey() {
+  const todayKST = new Date().toLocaleString('en-CA', { timeZone: 'Asia/Seoul' }).split(',')[0].trim();
+  return `${todayKST}_${MEAL_KOR[selectedMeal]}`;
+}
+
+async function loadPhotoIntoArea(key, area) {
+  try {
+    const resp = await fetch(WORKER_URL + '/photo?key=' + encodeURIComponent(key));
+    const data = await resp.json();
+    if (!document.getElementById('photoArea')) return;
+    if (data.photo) {
+      photoCache[key] = data.photo;
+      const src = `data:image/jpeg;base64,${data.photo}`;
+      const img = document.createElement('img');
+      img.className = 'meal-photo';
+      img.src = src;
+      img.alt = '식단 사진';
+      img.onclick = () => openPhotoModal(src);
+      area.innerHTML = '';
+      area.appendChild(img);
+    } else {
+      area.innerHTML = `<button class="photo-upload-btn" onclick="openCamera()" type="button"><span class="cam-icon">📷</span><span>사진 올리기</span></button>`;
+    }
+  } catch(e) {
+    if (document.getElementById('photoArea')) {
+      area.innerHTML = `<button class="photo-upload-btn" onclick="openCamera()" type="button"><span class="cam-icon">📷</span><span>사진 올리기</span></button>`;
+    }
+  }
+}
+
+function openCamera() {
+  const input = document.getElementById('cameraInput');
+  input.value = '';
+  input.click();
+}
+
+async function onPhotoSelected(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = '';
+
+  const area = document.getElementById('photoArea');
+  if (area) area.innerHTML = `<button class="photo-upload-btn" type="button"><span class="cam-icon">⏳</span><span>업로드 중</span></button>`;
+
+  try {
+    const compressed = await compressImage(file, 600, 0.6);
+    await fetch(WORKER_URL + '/photo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: currentPhotoKey, imageBase64: compressed })
+    });
+    photoCache[currentPhotoKey] = compressed;
+    const src = `data:image/jpeg;base64,${compressed}`;
+    const currentArea = document.getElementById('photoArea');
+    if (currentArea) {
+      const img = document.createElement('img');
+      img.className = 'meal-photo';
+      img.src = src;
+      img.alt = '식단 사진';
+      img.onclick = () => openPhotoModal(src);
+      currentArea.innerHTML = '';
+      currentArea.appendChild(img);
+    }
+  } catch(e) {
+    const currentArea = document.getElementById('photoArea');
+    if (currentArea) {
+      currentArea.innerHTML = `<button class="photo-upload-btn" onclick="openCamera()" type="button"><span class="cam-icon">📷</span><span>다시 시도</span></button>`;
+    }
+  }
+}
+
+function compressImage(file, maxSize, quality) {
+  return new Promise((res) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if (w > maxSize || h > maxSize) {
+          if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+          else { w = Math.round(w * maxSize / h); h = maxSize; }
+        }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        res(canvas.toDataURL('image/jpeg', quality).split(',')[1]);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function openPhotoModal(src) {
+  document.getElementById('photoModalImg').src = src;
+  document.getElementById('photoModal').classList.add('show');
+}
+
+function closePhotoModal() {
+  document.getElementById('photoModal').classList.remove('show');
 }
 
 tick();
