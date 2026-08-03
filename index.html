@@ -596,10 +596,19 @@ let currentPhotoKey = '';
 let photoCache = {};
 
 function getPhotoKey() {
-  // 선택된 날짜의 실제 date 값 사용
   const day = menuData?.days?.find(d => d.key === selectedDay);
-  const dateStr = day?.date || new Date().toLocaleString('en-CA', { timeZone: 'Asia/Seoul' }).split(',')[0].trim();
-  return `${dateStr}_${MEAL_KOR[selectedMeal]}`;
+  if (day?.date) {
+    // "08월 03일" → "2026-08-03" 형식으로 변환
+    const year = new Date().getFullYear();
+    const match = day.date.match(/(\d+)월\s*(\d+)일/);
+    if (match) {
+      const m = match[1].padStart(2, '0');
+      const d = match[2].padStart(2, '0');
+      return `${year}-${m}-${d}_${MEAL_KOR[selectedMeal]}`;
+    }
+  }
+  const todayKST = new Date().toLocaleString('en-CA', { timeZone: 'Asia/Seoul' }).split(',')[0].trim();
+  return `${todayKST}_${MEAL_KOR[selectedMeal]}`;
 }
 
 async function loadPhotoIntoArea(key, area) {
