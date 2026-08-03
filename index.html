@@ -596,8 +596,10 @@ let currentPhotoKey = '';
 let photoCache = {};
 
 function getPhotoKey() {
-  const todayKST = new Date().toLocaleString('en-CA', { timeZone: 'Asia/Seoul' }).split(',')[0].trim();
-  return `${todayKST}_${MEAL_KOR[selectedMeal]}`;
+  // 선택된 날짜의 실제 date 값 사용
+  const day = menuData?.days?.find(d => d.key === selectedDay);
+  const dateStr = day?.date || new Date().toLocaleString('en-CA', { timeZone: 'Asia/Seoul' }).split(',')[0].trim();
+  return `${dateStr}_${MEAL_KOR[selectedMeal]}`;
 }
 
 async function loadPhotoIntoArea(key, area) {
