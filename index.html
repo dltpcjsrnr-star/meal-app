@@ -31,6 +31,7 @@
   .meal-tab { flex: 1; padding: 8px 4px; border: none; border-radius: 10px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.6); transition: all 0.2s; }
   .meal-tab.active { background: white; color: var(--primary); }
   .meal-tab span { display: block; font-size: 16px; margin-bottom: 2px; }
+.meal-tab .time { display: block; font-size: 10px; opacity: 0.7; margin-top: 1px; }
 
   .day-bar { background: white; border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; scrollbar-width: none; padding: 0 0.75rem; position: sticky; top: 0; z-index: 9; }
   .day-bar::-webkit-scrollbar { display: none; }
@@ -160,9 +161,15 @@
     <div class="live-time" id="liveTime">--:--</div>
   </div>
   <div class="meal-tabs">
-    <button class="meal-tab" id="tab-b" onclick="setMeal('b')"><span>🌅</span>조식</button>
-    <button class="meal-tab" id="tab-l" onclick="setMeal('l')"><span>☀️</span>중식</button>
-    <button class="meal-tab" id="tab-d" onclick="setMeal('d')"><span>🌙</span>석식</button>
+<button class="meal-tab" id="tab-b" onclick="setMeal('b')">
+  <span>🌅</span>조식<span class="time">07:00~08:00</span>
+</button>
+<button class="meal-tab" id="tab-l" onclick="setMeal('l')">
+  <span>☀️</span>중식<span class="time">11:30~14:00</span>
+</button>
+<button class="meal-tab" id="tab-d" onclick="setMeal('d')">
+  <span>🌙</span>석식<span class="time">16:30~19:30</span>
+</button>
   </div>
 </div>
 
