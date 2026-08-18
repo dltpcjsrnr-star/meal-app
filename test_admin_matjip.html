@@ -161,7 +161,6 @@ let adminPassword = '';
 window.onload = () => {
   const saved = localStorage.getItem('admin_pw');
   if (saved) document.getElementById('adminPw').value = saved;
-  loadNotice();
 };
 
 async function unlock() {
@@ -189,19 +188,13 @@ if (resp.status === 401) {
     document.getElementById('noticeCard').style.pointerEvents = 'auto';
     document.getElementById('matjipCard').style.opacity = '1';
     document.getElementById('matjipCard').style.pointerEvents = 'auto';
-    loadNotice();
+    
   } catch(e) {
     document.getElementById('pwError').style.display = 'block';
   }
 }
 
-async function loadNotice() {
-  try {
-    const resp = await fetch(WORKER_URL + '/notice');
-    const data = await resp.json();
-    if (data.notice) document.getElementById('noticeInput').value = data.notice;
-  } catch(e) {}
-}
+async function loadNotice() {} // 테스트 버전에서는 미사용
 
 async function saveNotice() {
   if (!isUnlocked) return;
