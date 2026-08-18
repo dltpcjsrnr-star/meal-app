@@ -272,7 +272,6 @@
     <div class="modal-title">🍽 찐맛집 추천하기</div>
     <input class="modal-input" id="mName" placeholder="식당 이름 *">
     <input class="modal-input" id="mMenu" placeholder="추천 메뉴 * (예: 돈까스정식)">
-    <input class="modal-input" id="mAddress" placeholder="주소 (선택)">
     <textarea class="modal-input" id="mIntro" placeholder="한줄 소개 (선택, 예: 점심 줄서도 먹을 가치있음!)" style="height:70px;resize:none"></textarea>
     <input class="modal-input" id="mNick" placeholder="닉네임 (선택, 기본: 익명)">
     <div style="font-size:12px;color:var(--muted);margin-bottom:10px">※ 관리자 승인 후 공개됩니다</div>
@@ -820,7 +819,7 @@ async function loadMatjip() {
           <div class="matjip-footer">
             <div class="matjip-nick">추천: ${m.nickname}</div>
             <div class="matjip-actions">
-              ${m.address ? `<a class="naver-map-btn" href="https://map.naver.com/v5/search/${encodeURIComponent(m.name)}" target="_blank">🗺 지도</a>` : ''}
+              <a class="naver-map-btn" href="https://map.naver.com/v5/search/${encodeURIComponent(m.name)}" target="_blank">🗺 지도</a>
               <button class="like-btn ${liked ? 'liked' : ''}" onclick="toggleLike(${m.id}, this)">
                 ❤️ ${m.likes || 0}
               </button>
@@ -859,7 +858,6 @@ async function submitMatjip() {
   const menu = document.getElementById('mMenu').value.trim();
   if (!name || !menu) { alert('식당 이름과 추천 메뉴는 필수입니다'); return; }
 
-  const address = document.getElementById('mAddress').value.trim();
   const intro = document.getElementById('mIntro').value.trim();
   const nickname = document.getElementById('mNick').value.trim() || '익명';
 
@@ -867,7 +865,7 @@ async function submitMatjip() {
     const resp = await fetch(WORKER_URL + '/matjip', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, menu, address, intro, nickname })
+      body: JSON.stringify({ name, menu, intro, nickname })
     });
     const data = await resp.json();
     if (data.success) {
