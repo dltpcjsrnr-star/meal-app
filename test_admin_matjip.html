@@ -170,12 +170,10 @@ async function unlock() {
 
   // Worker에 테스트 요청으로 비밀번호 확인
   try {
-    const resp = await fetch(WORKER_URL + '/notice', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Admin-Password': pw },
-      body: JSON.stringify({ notice: document.getElementById('noticeInput').value || '' })
-    });
-    if (resp.status === 401) {
+    const resp = await fetch(WORKER_URL + '/matjip/pending', {
+  headers: { 'X-Admin-Password': pw }
+});
+if (resp.status === 401) {
       document.getElementById('pwError').style.display = 'block';
       return;
     }
