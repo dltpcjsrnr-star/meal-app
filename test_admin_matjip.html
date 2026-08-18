@@ -13,65 +13,51 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 3rem; }
-
   .header { background: var(--primary); color: white; padding: 1.25rem; }
   .header h1 { font-size: 18px; font-weight: 700; }
   .header p { font-size: 12px; opacity: 0.7; margin-top: 4px; }
-
   .section { margin: 1rem; }
   .card { background: var(--card); border-radius: 14px; padding: 1.25rem; border: 1px solid var(--border); margin-bottom: 1rem; }
   .card-title { font-size: 14px; font-weight: 700; margin-bottom: 1rem; color: var(--primary); }
-
   .input-row { display: flex; gap: 8px; margin-bottom: 8px; }
   .text-input { flex: 1; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 13px; background: var(--bg); }
   .text-input:focus { outline: none; border-color: var(--primary); }
   textarea.text-input { resize: vertical; min-height: 100px; }
-
   .btn { padding: 10px 16px; border: none; border-radius: 10px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
   .btn-primary { background: var(--primary); color: white; }
   .btn-accent { background: var(--accent); color: white; width: 100%; padding: 14px; font-size: 15px; font-weight: 700; border-radius: 12px; margin-top: 1rem; }
   .btn-accent:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn-green { background: var(--ok); color: white; width: 100%; padding: 14px; font-size: 15px; font-weight: 700; border-radius: 12px; margin-top: 1rem; display: none; }
   .btn-green.show { display: block; }
-
   .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
   .status { font-size: 12px; margin-top: 6px; }
   .status.ok { color: var(--ok); }
   .status.err { color: var(--err); }
-
-  /* 관리자 인증 */
   .auth-box { background: #FFF7ED; border: 1px solid #FED7AA; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
   .auth-box .auth-title { font-size: 13px; font-weight: 700; color: #9A3412; margin-bottom: 8px; }
   .auth-locked { display: block; }
   .auth-unlocked { display: none; }
   .auth-box.unlocked .auth-locked { display: none; }
   .auth-box.unlocked .auth-unlocked { display: block; font-size: 13px; color: var(--ok); font-weight: 500; }
-
   .upload-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg); }
-  .upload-zone:hover, .upload-zone.over { border-color: var(--primary); background: #F0F7EA; }
+  .upload-zone:hover { border-color: var(--primary); background: #F0F7EA; }
   .upload-zone .icon { font-size: 40px; margin-bottom: 0.75rem; }
   .upload-zone p { font-size: 14px; color: var(--muted); }
   #fileInput { display: none; }
-
   .preview-box { margin-top: 1rem; display: none; }
   .preview-box img { width: 100%; border-radius: 10px; border: 1px solid var(--border); }
   .preview-box .pdf-name { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 10px; padding: 12px; font-size: 14px; color: #1D4ED8; text-align: center; }
-
   .status-box { margin-top: 1rem; padding: 12px 14px; border-radius: 10px; font-size: 13px; line-height: 1.6; display: none; }
   .status-box.loading { background: #EFF6FF; color: #1D4ED8; display: block; }
   .status-box.success { background: #F0FDF4; color: var(--ok); display: block; }
   .status-box.error { background: #FEF2F2; color: var(--err); display: block; }
-
   .progress { height: 4px; background: var(--border); border-radius: 2px; margin-top: 8px; display: none; overflow: hidden; }
   .progress-fill { height: 100%; background: #3B82F6; border-radius: 2px; transition: width 0.4s; }
-
   .result-day { background: var(--bg); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-size: 13px; border: 1px solid var(--border); }
   .result-day strong { color: var(--primary); }
-
   .notice-status { font-size: 13px; margin-top: 8px; }
   .notice-status.ok { color: var(--ok); }
   .notice-status.err { color: var(--err); }
-
   .back-link { display: block; text-align: center; margin: 1rem; color: var(--muted); font-size: 13px; text-decoration: none; }
 </style>
 </head>
@@ -79,7 +65,7 @@
 
 <div class="header">
   <h1>⚙️ 식단 관리자 (테스트)</h1>
-  <p>식단표 업로드 · 공지사항 · 찐맛집 승인 관리</p>
+  <p>식단표 업로드 · 찐맛집 승인 관리</p>
 </div>
 
 <div class="section">
@@ -103,11 +89,9 @@
   <!-- 식단표 업로드 -->
   <div class="card" id="uploadCard" style="opacity:0.4;pointer-events:none">
     <div class="card-title">📸 식단표 업로드</div>
-    <div class="upload-zone" id="uploadZone"
-         onclick="document.getElementById('fileInput').click()"
-         ondragover="onDragOver(event)" ondrop="onDrop(event)" ondragleave="onDragLeave()">
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
       <div class="icon">📋</div>
-      <p>식단표 이미지 또는 PDF를<br>탭하거나 끌어다 놓으세요</p>
+      <p>식단표 이미지, PDF 또는 Excel을<br>탭하거나 끌어다 놓으세요</p>
       <p style="font-size:12px;margin-top:8px;opacity:0.6">JPG · PNG · PDF · Excel(.xlsx) 지원</p>
     </div>
     <input type="file" id="fileInput" accept="image/*,.pdf,.xlsx,.xls" onchange="onFileSelect(event)">
@@ -121,34 +105,25 @@
   <div class="card" id="resultCard" style="display:none">
     <div class="card-title">✅ 분석 결과</div>
     <div id="resultContent"></div>
-
-    <!-- 공개 시작일 -->
     <div style="margin-top:1rem;background:var(--bg);border-radius:10px;padding:1rem;border:1px solid var(--border)">
       <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--primary)">📅 공개 시작일 설정</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:10px">이 날짜부터 새 식단이 사용자에게 보입니다</div>
       <input type="date" class="text-input" id="publishDate" style="width:100%">
       <div style="font-size:12px;color:var(--muted);margin-top:6px">※ 비워두면 지금 즉시 공개됩니다</div>
     </div>
-
     <button class="btn-green show" onclick="publish()">📢 식단 업데이트 적용하기</button>
-  </div>
-
-  <!-- 공지사항 -->
-  <div class="card" id="noticeCard" style="opacity:0.4;pointer-events:none">
-    <div class="card-title">📢 공지사항 관리</div>
-    <textarea class="text-input" id="noticeInput" placeholder="공지사항을 입력하세요. 비워두면 공지사항이 숨겨집니다."></textarea>
-    <button class="btn btn-primary" style="width:100%;margin-top:10px;padding:12px;font-size:14px" onclick="saveNotice()">공지사항 저장</button>
-    <div class="notice-status" id="noticeStatus"></div>
   </div>
 
   <!-- 찐맛집 승인 관리 -->
   <div class="card" id="matjipCard" style="opacity:0.4;pointer-events:none">
     <div class="card-title">🍽 찐맛집 승인 관리</div>
-    <button class="btn btn-primary" style="width:100%;margin-bottom:1rem" onclick="loadPending()">승인 대기 목록 불러오기</button>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:1rem;padding:12px" onclick="loadPending()">승인 대기 목록 불러오기</button>
     <div id="pendingList" style="font-size:13px;color:var(--muted)">인증 후 불러오기를 눌러주세요</div>
   </div>
 
+</div>
 
+<a href="test_matjip.html" class="back-link">← 식단 보기로 돌아가기</a>
 
 <script>
 const WORKER_URL = 'https://meal-worker-test.dltpcjsrnr.workers.dev';
@@ -157,7 +132,6 @@ let parsedData = null;
 let isUnlocked = false;
 let adminPassword = '';
 
-// 저장된 비밀번호 자동 입력
 window.onload = () => {
   const saved = localStorage.getItem('admin_pw');
   if (saved) document.getElementById('adminPw').value = saved;
@@ -166,17 +140,14 @@ window.onload = () => {
 async function unlock() {
   const pw = document.getElementById('adminPw').value;
   if (!pw) return;
-
-  // Worker에 테스트 요청으로 비밀번호 확인
   try {
     const resp = await fetch(WORKER_URL + '/matjip/pending', {
-  headers: { 'X-Admin-Password': pw }
-});
-if (resp.status === 401) {
+      headers: { 'X-Admin-Password': pw }
+    });
+    if (resp.status === 401) {
       document.getElementById('pwError').style.display = 'block';
       return;
     }
-    // 성공
     adminPassword = pw;
     localStorage.setItem('admin_pw', pw);
     isUnlocked = true;
@@ -184,40 +155,19 @@ if (resp.status === 401) {
     document.getElementById('pwError').style.display = 'none';
     document.getElementById('uploadCard').style.opacity = '1';
     document.getElementById('uploadCard').style.pointerEvents = 'auto';
-    document.getElementById('noticeCard').style.opacity = '1';
-    document.getElementById('noticeCard').style.pointerEvents = 'auto';
     document.getElementById('matjipCard').style.opacity = '1';
     document.getElementById('matjipCard').style.pointerEvents = 'auto';
-    
   } catch(e) {
     document.getElementById('pwError').style.display = 'block';
   }
 }
 
-async function loadNotice() {} // 테스트 버전에서는 미사용
-
-async function saveNotice() {
-  if (!isUnlocked) return;
-  const notice = document.getElementById('noticeInput').value;
-  try {
-    const resp = await fetch(WORKER_URL + '/notice', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
-      body: JSON.stringify({ notice })
-    });
-    const data = await resp.json();
-    const el = document.getElementById('noticeStatus');
-    if (data.success) { el.textContent = '✓ 저장되었습니다'; el.className = 'notice-status ok'; }
-    else { el.textContent = '오류: ' + (data.error || '저장 실패'); el.className = 'notice-status err'; }
-  } catch(e) {
-    document.getElementById('noticeStatus').textContent = '오류: ' + e.message;
-    document.getElementById('noticeStatus').className = 'notice-status err';
-  }
+function isExcel(file) {
+  return file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+         file.type === 'application/vnd.ms-excel' ||
+         file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
 }
 
-function onDragOver(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('over'); }
-function onDragLeave() { document.getElementById('uploadZone').classList.remove('over'); }
-function onDrop(e) { e.preventDefault(); onDragLeave(); const f = e.dataTransfer.files[0]; if (f) setFile(f); }
 function onFileSelect(e) { if (e.target.files[0]) setFile(e.target.files[0]); }
 
 function setFile(file) {
@@ -225,10 +175,12 @@ function setFile(file) {
   const box = document.getElementById('previewBox');
   box.style.display = 'block';
   if (file.type === 'application/pdf') {
-    box.innerHTML = `<div class="pdf-name">📄 ${file.name}</div>`;
+    box.innerHTML = '<div class="pdf-name">📄 ' + file.name + '</div>';
+  } else if (isExcel(file)) {
+    box.innerHTML = '<div class="pdf-name">📊 ' + file.name + '</div>';
   } else {
     const reader = new FileReader();
-    reader.onload = e => { box.innerHTML = `<img src="${e.target.result}">`; };
+    reader.onload = e => { box.innerHTML = '<img src="' + e.target.result + '">'; };
     reader.readAsDataURL(file);
   }
   document.getElementById('analyzeBtn').disabled = false;
@@ -244,13 +196,6 @@ function setStatus(type, msg) {
 function setProgress(pct) {
   document.getElementById('progressBar').style.display = pct > 0 ? 'block' : 'none';
   document.getElementById('progressFill').style.width = pct + '%';
-}
-
-// 엑셀 여부 확인
-function isExcel(file) {
-  return file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-         file.type === 'application/vnd.ms-excel' ||
-         file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
 }
 
 async function analyzeFile() {
@@ -272,23 +217,19 @@ async function analyzeFile() {
     let resp;
 
     if (isExcel(selectedFile)) {
-      // 엑셀 파싱 → 텍스트로 변환 → AI 분석
       setStatus('loading', '엑셀 파일을 읽는 중...');
       const excelText = await parseExcelToText(selectedFile);
       setProgress(50);
       setStatus('loading', 'AI가 식단을 분석하는 중...');
-
       resp = await fetch(WORKER_URL + '/analyze-text', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
         body: JSON.stringify({ text: excelText })
       });
     } else {
-      // 이미지/PDF 분석 (기존 방식)
       const base64 = await fileToBase64(selectedFile);
       setProgress(50);
       const mimeType = selectedFile.type === 'application/pdf' ? 'application/pdf' : selectedFile.type;
-
       resp = await fetch(WORKER_URL + '/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
@@ -302,7 +243,7 @@ async function analyzeFile() {
 
     parsedData = result.data;
     setProgress(100);
-    setStatus('success', `✓ 분석 완료! ${parsedData.days?.length || 0}개 날짜 인식`);
+    setStatus('success', '✓ 분석 완료! ' + (parsedData.days ? parsedData.days.length : 0) + '개 날짜 인식');
     showResult(parsedData);
 
   } catch(e) {
@@ -338,77 +279,31 @@ function fileToBase64(file) {
   });
 }
 
-// ── 찐맛집 승인 관리 ─────────────────────────────────
-async function loadPending() {
-  const el = document.getElementById('pendingList');
-  el.innerHTML = '<div style="color:var(--muted)">불러오는 중...</div>';
-  try {
-    const resp = await fetch(WORKER_URL + '/matjip/pending', {
-      headers: { 'X-Admin-Password': adminPassword }
-    });
-    const list = await resp.json();
-    if (!list.length) {
-      el.innerHTML = '<div style="color:var(--muted);padding:1rem 0">승인 대기 중인 맛집이 없습니다</div>';
-      return;
-    }
-    el.innerHTML = list.map(m => `
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px">
-        <div style="font-weight:700;font-size:14px;margin-bottom:4px">${m.name}</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:2px">추천메뉴: ${m.menu}</div>
-        ${m.address ? `<div style="font-size:12px;color:var(--muted);margin-bottom:2px">주소: ${m.address}</div>` : ''}
-        ${m.intro ? `<div style="font-size:12px;color:var(--muted);margin-bottom:2px">"${m.intro}"</div>` : ''}
-        <div style="font-size:11px;color:var(--muted);margin-bottom:10px">등록자: ${m.nickname}</div>
-        <div style="display:flex;gap:8px">
-          <button onclick="approveMatjip(${m.id}, true)" style="flex:1;padding:8px;background:var(--ok);color:white;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">✓ 승인</button>
-          <button onclick="approveMatjip(${m.id}, false)" style="flex:1;padding:8px;background:var(--err);color:white;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">✕ 거절</button>
-        </div>
-      </div>
-    `).join('');
-  } catch(e) {
-    el.innerHTML = `<div style="color:var(--err)">오류: ${e.message}</div>`;
-  }
-}
-
-async function approveMatjip(id, approve) {
-  try {
-    await fetch(WORKER_URL + '/matjip/approve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
-      body: JSON.stringify({ id, approve })
-    });
-    loadPending();
-  } catch(e) { alert('오류: ' + e.message); }
-}
-
+function showResult(data) {
   const card = document.getElementById('resultCard');
   card.style.display = 'block';
   const html = (data.days || []).map(d => {
     const meals = ['조식','중식','석식'].filter(m => d[m]).map(m => {
       const meal = d[m];
-      return `${m}: ${meal.main || (meal.options?.[0]?.main) || '-'}`;
+      return m + ': ' + (meal.main || (meal.options && meal.options[0] && meal.options[0].main) || '-');
     }).join(' · ');
-    return `<div class="result-day"><strong>${d.key} (${d.date})</strong><br>${meals}</div>`;
+    return '<div class="result-day"><strong>' + d.key + ' (' + d.date + ')</strong><br>' + meals + '</div>';
   }).join('');
   document.getElementById('resultContent').innerHTML = html;
 
-  // 기본값: 다음 월요일
   const today = new Date();
   const day = today.getDay();
   const daysUntilMonday = day === 0 ? 1 : (8 - day) % 7 || 7;
   const nextMonday = new Date(today);
   nextMonday.setDate(today.getDate() + daysUntilMonday);
   document.getElementById('publishDate').value = nextMonday.toISOString().split('T')[0];
-
   setProgress(0);
 }
 
 async function publish() {
   if (!parsedData) return;
   const publishDate = document.getElementById('publishDate').value;
-
-  // publishDate를 데이터에 추가해서 Worker에 저장
-  const dataToSave = { ...parsedData, publishDate: publishDate || null };
-
+  const dataToSave = Object.assign({}, parsedData, { publishDate: publishDate || null });
   try {
     const resp = await fetch(WORKER_URL + '/save', {
       method: 'POST',
@@ -417,24 +312,14 @@ async function publish() {
     });
     const result = await resp.json();
     if (!result.success) throw new Error(result.error || '저장 실패');
-
     const msg = publishDate
-      ? `✅ 저장되었습니다!\n${publishDate} 부터 새 식단이 공개됩니다.`
+      ? '✅ 저장되었습니다!\n' + publishDate + ' 부터 새 식단이 공개됩니다.'
       : '✅ 식단이 즉시 업데이트되었습니다!';
     alert(msg);
-    window.location.href = 'index.html';
+    window.location.href = 'test_matjip.html';
   } catch(e) {
     alert('오류: ' + e.message);
   }
-}
-
-function fileToBase64(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result.split(',')[1]);
-    r.onerror = () => rej(new Error('파일 읽기 실패'));
-    r.readAsDataURL(file);
-  });
 }
 
 // ── 찐맛집 승인 관리 ─────────────────────────────────
@@ -450,20 +335,19 @@ async function loadPending() {
       el.innerHTML = '<div style="color:var(--muted);padding:1rem 0">승인 대기 중인 맛집이 없습니다</div>';
       return;
     }
-    el.innerHTML = list.map(m => `
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px">
-        <div style="font-weight:700;font-size:14px;margin-bottom:4px">${m.name}</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:2px">추천메뉴: ${m.menu}</div>
-        ${m.intro ? `<div style="font-size:12px;color:var(--muted);margin-bottom:2px">"${m.intro}"</div>` : ''}
-        <div style="font-size:11px;color:var(--muted);margin-bottom:10px">등록자: ${m.nickname}</div>
-        <div style="display:flex;gap:8px">
-          <button onclick="approveMatjip(${m.id}, true)" style="flex:1;padding:8px;background:var(--ok);color:white;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">✓ 승인</button>
-          <button onclick="approveMatjip(${m.id}, false)" style="flex:1;padding:8px;background:var(--err);color:white;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">✕ 거절</button>
-        </div>
-      </div>
-    `).join('');
+    el.innerHTML = list.map(function(m) {
+      return '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px">'
+        + '<div style="font-weight:700;font-size:14px;margin-bottom:4px">' + m.name + '</div>'
+        + '<div style="font-size:12px;color:var(--muted);margin-bottom:2px">추천메뉴: ' + m.menu + '</div>'
+        + (m.intro ? '<div style="font-size:12px;color:var(--muted);margin-bottom:2px">"' + m.intro + '"</div>' : '')
+        + '<div style="font-size:11px;color:var(--muted);margin-bottom:10px">등록자: ' + m.nickname + '</div>'
+        + '<div style="display:flex;gap:8px">'
+        + '<button onclick="approveMatjip(' + m.id + ', true)" style="flex:1;padding:8px;background:var(--ok);color:white;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">✓ 승인</button>'
+        + '<button onclick="approveMatjip(' + m.id + ', false)" style="flex:1;padding:8px;background:var(--err);color:white;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">✕ 거절</button>'
+        + '</div></div>';
+    }).join('');
   } catch(e) {
-    el.innerHTML = `<div style="color:var(--err)">오류: ${e.message}</div>`;
+    el.innerHTML = '<div style="color:var(--err)">오류: ' + e.message + '</div>';
   }
 }
 
@@ -472,7 +356,7 @@ async function approveMatjip(id, approve) {
     await fetch(WORKER_URL + '/matjip/approve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
-      body: JSON.stringify({ id, approve })
+      body: JSON.stringify({ id: id, approve: approve })
     });
     loadPending();
   } catch(e) { alert('오류: ' + e.message); }
