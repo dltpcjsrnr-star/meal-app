@@ -871,7 +871,7 @@ async function submitMatjip() {
     if (data.success) {
       alert('✅ 추천해주셔서 감사합니다!\n관리자 승인 후 공개됩니다 😊');
       closeModal('matjipModal');
-      ['mName','mMenu','mAddress','mIntro','mNick'].forEach(id => document.getElementById(id).value = '');
+      ['mName','mMenu','mIntro','mNick'].forEach(id => document.getElementById(id).value = '');
     } else throw new Error(data.error);
   } catch(e) { alert('오류: ' + e.message); }
 }
