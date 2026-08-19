@@ -190,6 +190,7 @@ async function unlock() {
     document.getElementById('noticeCard').style.opacity = '1';
     document.getElementById('noticeCard').style.pointerEvents = 'auto';
     loadNotice();
+  } catch(e) {
     document.getElementById('pwError').style.display = 'block';
   }
 }
