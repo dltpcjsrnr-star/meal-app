@@ -429,7 +429,7 @@ function showEditMatjip(id, name, menu, intro) {
   document.getElementById('editName').value = name;
   document.getElementById('editMenu').value = menu;
   document.getElementById('editIntro').value = intro;
-  document.getElementById('editModal').classList.add('show');
+  document.getElementById('editModal').style.display = 'flex';
 }
 
 async function saveEdit() {
@@ -443,7 +443,7 @@ async function saveEdit() {
       headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
       body: JSON.stringify({ id: editingId, name, menu, intro })
     });
-    document.getElementById('editModal').classList.remove('show');
+    document.getElementById('editModal').style.display = 'none';
     loadApproved();
   } catch(e) { alert('오류: ' + e.message); }
 }
