@@ -120,7 +120,41 @@
   .share-toast.show { display: block; }
   .shortcut-btn { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 1rem 1rem; background: var(--primary); color: #fff; text-decoration: none; padding: 13px; border-radius: 12px; font-weight: 700; font-size: 14px; }
   .shortcut-btn:active { background: var(--primary-light); }
-  .footer { text-align: center; padding: 1rem; font-size: 12px; color: var(--muted); padding-bottom: 5rem; }
+  /* 찐맛집 탭 */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); display: flex; z-index: 50; }
+  .bottom-nav-btn { flex: 1; padding: 10px 4px; border: none; background: none; font-family: inherit; font-size: 11px; color: var(--muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; -webkit-tap-highlight-color: transparent; }
+  .bottom-nav-btn span { font-size: 22px; }
+  .bottom-nav-btn.active { color: var(--primary); font-weight: 700; }
+  .bottom-nav-btn.active span { filter: drop-shadow(0 0 4px rgba(11,45,133,0.4)); }
+  .tab-page { display: none; }
+  .tab-page.active { display: block; }
+
+  .matjip-wrap { padding: 1rem; padding-bottom: 6rem; }
+  .matjip-add-btn { width: 100%; padding: 12px; border: 1.5px dashed var(--border); border-radius: 12px; background: none; font-family: inherit; font-size: 14px; color: var(--muted); cursor: pointer; margin-bottom: 1rem; -webkit-tap-highlight-color: transparent; }
+  .matjip-card { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 1rem 1.25rem; margin-bottom: 10px; }
+  .matjip-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .matjip-name { font-size: 16px; font-weight: 700; color: var(--text); }
+  .matjip-menu { display: inline-block; background: var(--accent-light); color: var(--accent); font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 10px; margin-bottom: 6px; }
+  .matjip-intro { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+  .matjip-address { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .matjip-footer { display: flex; align-items: center; justify-content: space-between; }
+  .matjip-nick { font-size: 12px; color: var(--muted); }
+  .matjip-actions { display: flex; gap: 8px; align-items: center; }
+  .like-btn { display: flex; align-items: center; gap: 4px; padding: 6px 12px; border: 1.5px solid var(--border); border-radius: 20px; background: none; font-family: inherit; font-size: 13px; cursor: pointer; color: var(--muted); -webkit-tap-highlight-color: transparent; transition: all 0.15s; }
+  .like-btn.liked { background: #FEF2F2; border-color: #FCA5A5; color: #DC2626; }
+  .naver-map-btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: #03C75A; color: white; border: none; border-radius: 20px; font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+
+  /* 등록 모달 */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: flex-end; }
+  .modal-overlay.show { display: flex; }
+  .modal-box { background: white; border-radius: 20px 20px 0 0; padding: 1.5rem; width: 100%; max-height: 85vh; overflow-y: auto; }
+  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 1rem; color: var(--primary); }
+  .modal-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 14px; margin-bottom: 10px; background: var(--bg); }
+  .modal-input:focus { outline: none; border-color: var(--primary); }
+  .modal-btn { width: 100%; padding: 13px; border: none; border-radius: 12px; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 4px; }
+  .modal-btn-primary { background: var(--primary); color: white; }
+  .modal-btn-cancel { background: var(--bg); color: var(--muted); }
+  .footer { text-align: center; padding: 1rem; font-size: 12px; color: var(--muted); padding-bottom: 6rem; }
   .footer a { color: var(--primary-light); text-decoration: none; font-weight: 500; }
 
   /* 식단 사진 */
@@ -174,6 +208,9 @@
 </div>
 
 <div class="day-bar" id="dayBar"></div>
+
+<!-- 식단 페이지 -->
+<div id="page-meal" class="tab-page active">
 <div id="mainContent"><div class="loading"><div class="spinner"></div>불러오는 중...</div></div>
 
 <!-- 공지사항 -->
@@ -204,7 +241,11 @@
   </div>
 </div>
 
-<a href="https://dltpcjsrnr-star.github.io/bus-info/" class="shortcut-btn">🚌 버스 도착정보</a>
+<!-- 버튼 두 개 나란히 -->
+<div style="display:flex;gap:10px;margin:0 1rem 1rem">
+  <a href="https://dltpcjsrnr-star.github.io/bus-info/" class="shortcut-btn" style="flex:1;margin:0;background:white;color:var(--primary);border:1.5px solid var(--border)">🚌 버스 도착정보</a>
+  <a href="restaurant.html" class="shortcut-btn" style="flex:1;margin:0;background:white;color:var(--primary);border:1.5px solid var(--border)">📍 주변맛집</a>
+</div>
 
 <!-- 공유하기 -->
 <button class="share-btn" onclick="shareApp()">🔗 이번 주 식단 공유하기</button>
@@ -213,6 +254,7 @@
 <div class="footer">
   <div style="margin-bottom:6px">Made by 홍보팀 · 이세웅</div>
   <a href="admin.html">관리자 페이지</a>
+</div>
 </div>
 
 <!-- 사진 크게 보기 모달 -->
@@ -652,10 +694,11 @@ function openCamera() {
 async function onPhotoSelected(e) {
   const file = e.target.files[0];
   if (!file) return;
-  e.target.value = '';
 
   const area = document.getElementById('photoArea');
   if (area) area.innerHTML = `<button class="photo-upload-btn" type="button"><span class="cam-icon">⏳</span><span>업로드 중</span></button>`;
+
+  e.target.value = ''; // 압축 시작 전 초기화
 
   try {
     const compressed = await compressImage(file, 600, 0.6);
@@ -713,6 +756,102 @@ function openPhotoModal(src) {
 
 function closePhotoModal() {
   document.getElementById('photoModal').classList.remove('show');
+}
+
+// ── 탭 전환 ──────────────────────────────────────────
+function switchMainTab(tab) {
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.getElementById('nav-' + tab).classList.add('active');
+  // 요일바는 식단탭에서만 보이게
+  document.getElementById('dayBar').style.display = tab === 'meal' ? 'flex' : 'none';
+  if (tab === 'matjip') loadMatjip();
+}
+
+// ── 찐맛집 ───────────────────────────────────────────
+// 사용자 고유 ID (좋아요 중복 방지)
+let userId = localStorage.getItem('userId');
+if (!userId) { userId = 'u' + Date.now() + Math.random().toString(36).slice(2); localStorage.setItem('userId', userId); }
+
+async function loadMatjip() {
+  const el = document.getElementById('matjipList');
+  try {
+    const resp = await fetch(WORKER_URL + '/matjip');
+    const list = await resp.json();
+    if (!list.length) {
+      el.innerHTML = '<div class="no-data"><div class="emoji">🍽</div><h3>아직 추천된 맛집이 없어요</h3><p style="font-size:13px;color:var(--muted);margin-top:4px">첫 번째 맛집을 추천해보세요!</p></div>';
+      return;
+    }
+    el.innerHTML = list.map(m => {
+      const liked = (m.likedBy || []).includes(userId);
+      return `
+        <div class="matjip-card">
+          <div class="matjip-header">
+            <div class="matjip-name">${m.name}</div>
+          </div>
+          <div class="matjip-menu">🍴 ${m.menu}</div>
+          ${m.intro ? `<div class="matjip-intro">"${m.intro}"</div>` : ''}
+          ${m.address ? `<div class="matjip-address">📍 ${m.address}</div>` : ''}
+          <div class="matjip-footer">
+            <div class="matjip-nick">추천: ${m.nickname}</div>
+            <div class="matjip-actions">
+              ${m.address ? `<a class="naver-map-btn" href="https://map.naver.com/v5/search/${encodeURIComponent(m.name)}" target="_blank">🗺 지도</a>` : ''}
+              <button class="like-btn ${liked ? 'liked' : ''}" onclick="toggleLike(${m.id}, this)">
+                ❤️ ${m.likes || 0}
+              </button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = `<div style="color:var(--err);padding:1rem">불러오기 실패</div>`;
+  }
+}
+
+async function toggleLike(id, btn) {
+  try {
+    const resp = await fetch(WORKER_URL + '/matjip/like', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, userId })
+    });
+    const data = await resp.json();
+    btn.classList.toggle('liked', data.liked);
+    btn.textContent = `❤️ ${data.likes}`;
+  } catch(e) {}
+}
+
+function showMatjipForm() {
+  document.getElementById('matjipModal').classList.add('show');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+async function submitMatjip() {
+  const name = document.getElementById('mName').value.trim();
+  const menu = document.getElementById('mMenu').value.trim();
+  if (!name || !menu) { alert('식당 이름과 추천 메뉴는 필수입니다'); return; }
+
+  const address = document.getElementById('mAddress').value.trim();
+  const intro = document.getElementById('mIntro').value.trim();
+  const nickname = document.getElementById('mNick').value.trim() || '익명';
+
+  try {
+    const resp = await fetch(WORKER_URL + '/matjip', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, menu, address, intro, nickname })
+    });
+    const data = await resp.json();
+    if (data.success) {
+      alert('✅ 추천해주셔서 감사합니다!\n관리자 승인 후 공개됩니다 😊');
+      closeModal('matjipModal');
+      ['mName','mMenu','mAddress','mIntro','mNick'].forEach(id => document.getElementById(id).value = '');
+    } else throw new Error(data.error);
+  } catch(e) { alert('오류: ' + e.message); }
 }
 
 tick();
