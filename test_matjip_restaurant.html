@@ -44,7 +44,10 @@
   .modal-btn-primary { background: var(--primary); color: white; }
   .modal-btn-cancel { background: var(--bg); color: var(--muted); }
 
-  .loading { text-align: center; padding: 3rem; color: var(--muted); }
+  .filter-bar { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 0.75rem 1rem; background: white; border-bottom: 1px solid var(--border); }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  .filter-btn { flex-shrink: 0; padding: 6px 14px; border: 1.5px solid var(--border); border-radius: 20px; background: none; font-family: inherit; font-size: 13px; cursor: pointer; color: var(--muted); -webkit-tap-highlight-color: transparent; transition: all 0.15s; white-space: nowrap; }
+  .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: 500; }
   .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .no-data { text-align: center; padding: 3rem 1rem; color: var(--muted); }
@@ -61,6 +64,21 @@
   </div>
 </div>
 
+</div>
+
+<!-- 카테고리 필터 -->
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="setFilter('전체', this)">🍽 전체</button>
+  <button class="filter-btn" onclick="setFilter('한식', this)">🥢 한식</button>
+  <button class="filter-btn" onclick="setFilter('중식', this)">🥡 중식</button>
+  <button class="filter-btn" onclick="setFilter('양식', this)">🍝 양식</button>
+  <button class="filter-btn" onclick="setFilter('일식', this)">🍱 일식</button>
+  <button class="filter-btn" onclick="setFilter('분식', this)">🥫 분식</button>
+  <button class="filter-btn" onclick="setFilter('패스트푸드', this)">🍔 패스트푸드</button>
+  <button class="filter-btn" onclick="setFilter('카페', this)">☕ 카페</button>
+  <button class="filter-btn" onclick="setFilter('기타', this)">🍴 기타</button>
+</div>
+
 <div class="wrap">
   <button class="add-btn" onclick="showMatjipForm()">+ 맛집 추천하기</button>
   <div id="matjipList"><div class="loading"><div class="spinner"></div>불러오는 중...</div></div>
@@ -72,6 +90,16 @@
     <div class="modal-title">📍 맛집 추천하기</div>
     <input class="modal-input" id="mName" placeholder="식당 이름 *">
     <input class="modal-input" id="mMenu" placeholder="추천 메뉴 * (예: 돈까스정식)">
+    <select class="modal-input" id="mCategory">
+      <option value="한식">🥢 한식</option>
+      <option value="중식">🥡 중식</option>
+      <option value="양식">🍝 양식</option>
+      <option value="일식">🍱 일식</option>
+      <option value="분식">🥫 분식</option>
+      <option value="패스트푸드">🍔 패스트푸드</option>
+      <option value="카페">☕ 카페</option>
+      <option value="기타">🍴 기타</option>
+    </select>
     <textarea class="modal-input" id="mIntro" placeholder="한줄 소개 (선택, 예: 점심 줄서도 먹을 가치있음!)" style="height:70px;resize:none"></textarea>
     <input class="modal-input" id="mNick" placeholder="닉네임 (선택, 기본: 익명)">
     <div style="font-size:12px;color:var(--muted);margin-bottom:10px">※ 관리자 승인 후 공개됩니다</div>
@@ -86,31 +114,54 @@ const WORKER_URL = 'https://meal-worker-test.dltpcjsrnr.workers.dev';
 let userId = localStorage.getItem('userId');
 if (!userId) { userId = 'u' + Date.now() + Math.random().toString(36).slice(2); localStorage.setItem('userId', userId); }
 
+let allMatjip = [];
+let currentFilter = '전체';
+
+function setFilter(category, btn) {
+  currentFilter = category;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMatjip();
+}
+
+function renderMatjip() {
+  const el = document.getElementById('matjipList');
+  const list = currentFilter === '전체' ? allMatjip : allMatjip.filter(m => m.category === currentFilter);
+
+  if (!list.length) {
+    el.innerHTML = '<div class="no-data"><div class="emoji">🍽</div><h3>' + (currentFilter === '전체' ? '아직 추천된 맛집이 없어요' : currentFilter + ' 맛집이 없어요') + '</h3><p style="font-size:13px;color:var(--muted);margin-top:4px">첫 번째 맛집을 추천해보세요!</p></div>';
+    return;
+  }
+
+  el.innerHTML = list.map(m => {
+    const liked = (m.likedBy || []).includes(userId);
+    const categoryEmoji = { '한식': '🥢', '중식': '🥡', '양식': '🍝', '일식': '🍱', '분식': '🥫', '패스트푸드': '🍔', '카페': '☕', '기타': '🍴' }[m.category] || '🍴';
+    return `
+      <div class="matjip-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+          <div class="matjip-name">${m.name}</div>
+          <span style="font-size:11px;background:var(--bg);border:1px solid var(--border);padding:2px 8px;border-radius:10px;color:var(--muted);flex-shrink:0;margin-left:8px">${categoryEmoji} ${m.category || '기타'}</span>
+        </div>
+        <div class="matjip-menu">🍴 ${m.menu}</div>
+        ${m.intro ? `<div class="matjip-intro">"${m.intro}"</div>` : ''}
+        <div class="matjip-footer">
+          <div class="matjip-nick">추천: ${m.nickname}</div>
+          <div class="matjip-actions">
+            <a class="naver-map-btn" href="https://map.naver.com/v5/search/${encodeURIComponent(m.name)}" target="_blank">🗺 지도</a>
+            <button class="like-btn ${liked ? 'liked' : ''}" onclick="toggleLike(${m.id}, this)">❤️ ${m.likes || 0}</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
 async function loadMatjip() {
   const el = document.getElementById('matjipList');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div>불러오는 중...</div>';
   try {
     const resp = await fetch(WORKER_URL + '/matjip');
-    const list = await resp.json();
-    if (!list.length) {
-      el.innerHTML = '<div class="no-data"><div class="emoji">🍽</div><h3>아직 추천된 맛집이 없어요</h3><p style="font-size:13px;color:var(--muted);margin-top:4px">첫 번째 맛집을 추천해보세요!</p></div>';
-      return;
-    }
-    el.innerHTML = list.map(m => {
-      const liked = (m.likedBy || []).includes(userId);
-      return `
-        <div class="matjip-card">
-          <div class="matjip-name">${m.name}</div>
-          <div class="matjip-menu">🍴 ${m.menu}</div>
-          ${m.intro ? `<div class="matjip-intro">"${m.intro}"</div>` : ''}
-          <div class="matjip-footer">
-            <div class="matjip-nick">추천: ${m.nickname}</div>
-            <div class="matjip-actions">
-              <a class="naver-map-btn" href="https://map.naver.com/v5/search/${encodeURIComponent(m.name)}" target="_blank">🗺 지도</a>
-              <button class="like-btn ${liked ? 'liked' : ''}" onclick="toggleLike(${m.id}, this)">❤️ ${m.likes || 0}</button>
-            </div>
-          </div>
-        </div>`;
-    }).join('');
+    allMatjip = await resp.json();
+    renderMatjip();
   } catch(e) {
     el.innerHTML = '<div style="color:red;padding:1rem">불러오기 실패</div>';
   }
@@ -143,11 +194,12 @@ async function submitMatjip() {
   if (!name || !menu) { alert('식당 이름과 추천 메뉴는 필수입니다'); return; }
   const intro = document.getElementById('mIntro').value.trim();
   const nickname = document.getElementById('mNick').value.trim() || '익명';
+  const category = document.getElementById('mCategory').value;
   try {
     const resp = await fetch(WORKER_URL + '/matjip', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, menu, intro, nickname })
+      body: JSON.stringify({ name, menu, intro, nickname, category })
     });
     const data = await resp.json();
     if (data.success) {
