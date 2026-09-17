@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VISION 2040 JOURNEY — Prototype</title>
+<style>
+:root{
+  --navy:#123f69; --blue:#6fa8d4; --sky:#eaf5fc; --paper:#fbfaf6;
+  --line:#c8dbea; --ink:#214b70; --muted:#7592aa; --white:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;color:var(--ink);background:#eef6fb}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh}
+.topbar{height:64px;background:rgba(255,255,255,.96);border-bottom:1px solid #d9e6ef;display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:10}
+.brand{letter-spacing:2px;font-size:12px;font-weight:700;color:var(--navy)}
+.brand span{display:block;font-size:9px;letter-spacing:3px;margin-top:4px;color:var(--muted)}
+.nav{display:flex;gap:8px}
+.nav button{border:0;background:transparent;color:var(--ink);padding:9px 12px;border-radius:20px;font-size:12px}
+.nav button:hover,.nav button.active{background:#eaf4fb}
+.page{max-width:1180px;margin:auto;padding:28px 20px 70px}
+.hero{min-height:650px;border-radius:26px;overflow:hidden;position:relative;background:
+ radial-gradient(circle at 80% 12%,rgba(255,255,255,.9),transparent 23%),
+ linear-gradient(180deg,#a9d3ee 0%,#e7f4fb 48%,#f8f8f4 100%);
+ display:flex;align-items:center;justify-content:center;text-align:center;
+ box-shadow:0 18px 55px rgba(29,78,111,.12);
+}
+.hero:before{content:"✈";position:absolute;top:80px;right:18%;font-size:42px;color:#477ba5;transform:rotate(-12deg)}
+.hero:after{content:"";position:absolute;left:-5%;right:-5%;bottom:-90px;height:230px;background:#fff;border-radius:50% 50% 0 0/30% 30% 0 0;opacity:.72}
+.hero-content{position:relative;z-index:2;width:min(520px,90%)}
+.kicker{font-size:10px;letter-spacing:3px;color:var(--navy);font-weight:700}
+.script{font-family:Georgia,serif;font-style:italic;color:#5796c8;font-size:48px;margin:16px 0 0}
+h1{font-family:Georgia,serif;font-size:54px;letter-spacing:3px;margin:0 0 20px;color:var(--navy)}
+.subtitle{font-size:15px;line-height:1.8;margin-bottom:28px}
+.form{background:rgba(255,255,255,.9);padding:22px;border-radius:18px;box-shadow:0 10px 35px rgba(31,76,108,.12);text-align:left}
+.input{width:100%;border:1px solid var(--line);border-radius:10px;padding:13px 14px;margin:6px 0 10px;background:#fff}
+.primary{width:100%;border:0;background:var(--navy);color:#fff;border-radius:10px;padding:13px 16px;font-weight:700}
+.secondary{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:10px;padding:10px 14px}
+.note{font-size:11px;color:var(--muted);margin-top:12px}
+.section-title{font-family:Georgia,serif;font-size:30px;color:var(--navy);margin:5px 0}
+.section-sub{color:var(--muted);font-size:12px;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.card{background:rgba(255,255,255,.94);border:1px solid #d7e5ef;border-radius:20px;padding:22px;box-shadow:0 10px 28px rgba(31,76,108,.06)}
+.passport{display:grid;grid-template-columns:160px 1fr;gap:20px;align-items:center}
+.photo{width:160px;height:190px;border-radius:12px;background:linear-gradient(135deg,#eaf4fa,#d4e8f4);display:flex;align-items:center;justify-content:center;color:#8aa6b9;overflow:hidden}
+.photo img{width:100%;height:100%;object-fit:cover}
+.label{font-size:10px;letter-spacing:2px;color:var(--muted)}
+.value{font-weight:700;margin:6px 0 14px}
+.progress{height:8px;background:#e8f0f5;border-radius:10px;overflow:hidden}
+.progress i{display:block;height:100%;background:#6fa8d4;width:30%}
+.stamps{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.stamp{aspect-ratio:1;border:1px dashed #a9c4d8;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;color:#9ab1c2;background:#f8fbfd;position:relative}
+.stamp.done{background:#edf7fd;border:2px solid #72a9d1;color:var(--navy);box-shadow:inset 0 0 0 5px #f8fbfd}
+.stamp.done:after{content:"✓";position:absolute;top:7px;right:13px;font-size:14px;color:#5d9aca}
+.event-row{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #edf2f5;padding:14px 0;font-size:12px}
+.event-row:last-child{border-bottom:0}
+.badge{padding:5px 9px;border-radius:20px;background:#edf6fb;color:#4b82aa;font-size:10px}
+.menu{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.menu button{border:1px solid #dbe8f0;background:#fff;border-radius:12px;padding:13px 8px;color:var(--ink);font-size:11px}
+.qrbox{width:240px;height:240px;margin:10px auto 20px;background:repeating-linear-gradient(45deg,#183f63 0 5px,#fff 5px 10px);border:18px solid #fff;box-shadow:0 8px 25px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center}
+.qrbox span{background:#fff;padding:14px;font-weight:800;color:var(--navy)}
+.center{text-align:center}
+.roulette{width:330px;height:330px;border-radius:50%;margin:20px auto;background:conic-gradient(#d8eaf5 0 45deg,#fff 45deg 90deg,#d8eaf5 90deg 135deg,#fff 135deg 180deg,#d8eaf5 180deg 225deg,#fff 225deg 270deg,#d8eaf5 270deg 315deg,#fff 315deg 360deg);border:12px solid #fff;box-shadow:0 10px 35px rgba(23,68,101,.16);display:flex;align-items:center;justify-content:center;position:relative}
+.roulette:before{content:"";position:absolute;top:-25px;border-left:10px solid transparent;border-right:10px solid transparent;border-top:20px solid var(--navy)}
+.roulette button{width:100px;height:100px;border-radius:50%;border:0;background:var(--navy);color:#fff;font-weight:800}
+.admin{display:grid;grid-template-columns:190px 1fr;gap:18px}
+.side{background:var(--navy);color:#fff;border-radius:18px;padding:15px;height:max-content}
+.side button{display:block;width:100%;border:0;background:transparent;color:#dbeaf4;text-align:left;padding:12px;border-radius:9px;font-size:12px}
+.side button.active,.side button:hover{background:rgba(255,255,255,.13);color:#fff}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi{background:#fff;border:1px solid #dbe7ee;border-radius:14px;padding:16px}.kpi b{display:block;font-size:24px;color:var(--navy);margin-top:7px}
+.table{width:100%;border-collapse:collapse;font-size:11px;background:#fff;border-radius:14px;overflow:hidden}
+.table th,.table td{padding:12px;border-bottom:1px solid #edf1f4;text-align:left}
+.table th{color:var(--muted);font-weight:600}
+.alert{padding:12px 14px;border-radius:10px;background:#eef8fd;color:#42779d;font-size:11px;margin-top:12px}
+.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 18px;border-radius:30px;font-size:12px;display:none;z-index:30}
+.hidden{display:none!important}
+@media(max-width:800px){
+ .topbar{padding:0 14px}.nav{display:none}.page{padding:16px 12px 50px}
+ .hero{min-height:610px}.script{font-size:38px}h1{font-size:42px}
+ .grid,.admin{grid-template-columns:1fr}.passport{grid-template-columns:110px 1fr}.photo{width:110px;height:140px}
+ .stamps{gap:8px}.stamp{font-size:8px}.kpis{grid-template-columns:repeat(2,1fr)}
+ .menu{grid-template-columns:repeat(4,1fr)}.roulette{width:290px;height:290px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand">ST. VINCENT'S HOSPITAL<span>VISION 2040 JOURNEY</span></div>
+  <div class="nav">
+    <button onclick="show('home')" class="active">직원용</button>
+    <button onclick="show('adminLogin')">관리자</button>
+  </div>
+</header>
+
+<main id="home" class="page">
+<section class="hero">
+ <div class="hero-content">
+   <div class="kicker">ST. VINCENT'S HOSPITAL · VISION 2040</div>
+   <div class="script">Vision 2040</div>
+   <h1>JOURNEY</h1>
+   <div class="subtitle">한 걸음씩, 비전 2040에 가까워집니다.<br>당신의 여정을 시작해보세요.</div>
+   <div class="form">
+     <label class="label">이름</label>
+     <input id="name" class="input" placeholder="이름을 입력하세요" value="김지현">
+     <label class="label">사번</label>
+     <input id="emp" class="input" placeholder="사번을 입력하세요" value="123456">
+     <button class="primary" onclick="login()">JOURNEY 시작하기 →</button>
+     <div class="note">※ 프로토타입에서는 예시 직원 정보로 바로 체험할 수 있습니다.</div>
+   </div>
+ </div>
+</section>
+</main>
+
+<main id="employee" class="page hidden">
+ <div class="grid">
+  <section class="card passport">
+    <div>
+      <div id="photo" class="photo">MY PHOTO</div>
+      <input id="photoInput" type="file" accept="image/*" class="hidden" onchange="previewPhoto(event)">
+      <button class="secondary" style="width:100%;margin-top:8px" onclick="document.getElementById('photoInput').click()">사진 업로드</button>
+    </div>
+    <div>
+      <div class="label">MY PASSPORT</div>
+      <h2 style="font-family:Georgia,serif;color:var(--navy);margin:8px 0 18px">My 2040</h2>
+      <div class="label">이름</div><div class="value" id="userName">김지현</div>
+      <div class="label">소속</div><div class="value">간호부</div>
+      <div class="label">사번</div><div class="value" id="userEmp">123456</div>
+      <div class="label">MY JOURNEY</div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin:7px 0"><span>현재 스탬프</span><b id="count">3 / 10</b></div>
+      <div class="progress"><i id="progress"></i></div>
+    </div>
+  </section>
+  <section class="card">
+    <div class="label">OUR JOURNEY</div>
+    <div class="section-title">한 걸음씩, 비전 2040에 가까워집니다.</div>
+    <div class="stamps" id="stamps" style="margin-top:22px"></div>
+    <div class="menu">
+      <button onclick="show('employee')">◉<br>내 스탬프</button>
+      <button onclick="show('event')">▣<br>이벤트</button>
+      <button onclick="show('qr')">✈<br>QR 인증</button>
+      <button onclick="show('record')">♡<br>여행 기록</button>
+    </div>
+  </section>
+ </div>
+</main>
+
+<main id="qr" class="page hidden">
+ <section class="card center">
+   <div class="label">STAMP CHECK-IN</div>
+   <div class="section-title">스탬프 적립하기</div>
+   <div class="section-sub">현장에 있는 QR 코드를 스캔하면 스탬프가 적립됩니다.</div>
+   <div class="qrbox"><span>QR<br>SCAN</span></div>
+   <button class="primary" style="max-width:280px" onclick="addStamp(4)">QR 인증 시뮬레이션</button>
+   <div id="qrResult" class="alert hidden">EVENT 04 스탬프가 적립되었습니다. ✈</div>
+ </section>
+</main>
+
+<main id="event" class="page hidden">
+ <section class="card">
+   <div class="label">DESTINATION 04</div>
+   <div class="section-title">새로운 시작, 함께하는 도전</div>
+   <div class="section-sub">2026.11.01 – 2026.11.30</div>
+   <div class="event-row"><span>참여 방법</span><span class="badge">QR 인증</span></div>
+   <div class="event-row"><span>참여 완료</span><span class="badge" id="eventStatus">미참여</span></div>
+   <div class="event-row"><span>획득 스탬프</span><span class="badge">STAMP 04</span></div>
+   <button class="primary" style="margin-top:15px" onclick="show('qr')">이벤트 참여하기 →</button>
+ </section>
+</main>
+
+<main id="record" class="page hidden">
+ <section class="card">
+   <div class="label">MY JOURNEY LOG</div>
+   <div class="section-title">나의 여행 기록</div>
+   <div class="section-sub">작은 발걸음이 하나의 여정이 됩니다.</div>
+   <div class="event-row"><span>EVENT 01 · Journey Begins</span><span class="badge">완료</span></div>
+   <div class="event-row"><span>EVENT 02 · Together</span><span class="badge">완료</span></div>
+   <div class="event-row"><span>EVENT 03 · New Route</span><span class="badge">완료</span></div>
+   <div class="event-row"><span>EVENT 04 · New Challenge</span><span class="badge" id="recordStatus">미참여</span></div>
+ </section>
+</main>
+
+<main id="roulette" class="page hidden">
+ <section class="card center">
+   <div class="label">LUCKY JOURNEY</div>
+   <div class="section-title">행운의 룰렛을 돌려보세요!</div>
+   <div class="roulette" id="wheel"><button onclick="spin()">START</button></div>
+   <div id="prize" class="alert hidden"></div>
+ </section>
+</main>
+
+<main id="complete" class="page hidden">
+ <section class="hero" style="min-height:600px">
+  <div class="hero-content">
+   <div class="script">Congratulations!</div>
+   <h1 style="font-size:42px">JOURNEY COMPLETE</h1>
+   <div class="subtitle">모든 스탬프를 완료했습니다!<br>당신의 여정이 비전 2040을 채워갑니다.</div>
+   <button class="primary" onclick="show('employee')">나의 여정 다시 보기</button>
+  </div>
+ </section>
+</main>
+
+<main id="adminLogin" class="page hidden">
+ <section class="hero" style="min-height:620px">
+  <div class="hero-content">
+   <div class="kicker">VISION 2040 JOURNEY</div><div class="script">Admin</div><h1 style="font-size:44px">CONTROL</h1>
+   <div class="form">
+    <label class="label">관리자 아이디</label><input class="input" value="admin">
+    <label class="label">비밀번호</label><input class="input" type="password" value="1234">
+    <button class="primary" onclick="show('admin')">관리자 페이지 로그인</button>
+    <div class="note">프로토타입 로그인입니다.</div>
+   </div>
+  </div>
+ </section>
+</main>
+
+<main id="admin" class="page hidden">
+ <div class="admin">
+  <aside class="side">
+   <div style="font-weight:700;margin:5px 8px 15px">ADMIN</div>
+   <button class="active" onclick="adminTab('dashboard',this)">대시보드</button>
+   <button onclick="adminTab('users',this)">참여자 검색</button>
+   <button onclick="adminTab('stamp',this)">스탬프 수동 지급</button>
+   <button onclick="adminTab('logs',this)">QR 인증 로그</button>
+   <button onclick="adminTab('ranking',this)">랭킹 / 통계</button>
+  </aside>
+  <section>
+   <div id="dashboard" class="adminTab">
+    <div class="label">DASHBOARD</div><div class="section-title">전체 참여 현황</div>
+    <div class="kpis" style="margin:18px 0">
+     <div class="kpi"><span class="label">전체 직원</span><b>1,842</b></div>
+     <div class="kpi"><span class="label">참여자</span><b id="adminParticipants">1,327</b></div>
+     <div class="kpi"><span class="label">참여율</span><b>72.1%</b></div>
+     <div class="kpi"><span class="label">평균 스탬프</span><b id="avgStamp">5.8</b></div>
+    </div>
+    <div class="card">
+      <div class="label">EVENT PARTICIPATION</div>
+      <table class="table"><tr><th>행사</th><th>참여자</th><th>참여율</th></tr>
+      <tr><td>EVENT 01</td><td>1,203</td><td>65.3%</td></tr><tr><td>EVENT 02</td><td>1,156</td><td>62.8%</td></tr>
+      <tr><td>EVENT 03</td><td>987</td><td>53.6%</td></tr><tr><td>EVENT 04</td><td id="event4Count">842</td><td>45.7%</td></tr></table>
+    </div>
+   </div>
+   <div id="users" class="adminTab hidden">
+    <div class="label">PARTICIPANT SEARCH</div><div class="section-title">참여자 상세 검색</div>
+    <div class="card"><input id="searchEmp" class="input" value="123456" placeholder="사번 또는 이름"><button class="primary" onclick="searchUser()">검색</button></div>
+    <div class="card" style="margin-top:14px" id="userResult"><b>김지현</b> · 간호부 · 123456<br><br>현재 스탬프 <b id="searchCount">3 / 10</b><br><br>
+      EVENT 01 ✓ QR &nbsp; EVENT 02 ✓ QR &nbsp; EVENT 03 ✓ QR &nbsp; EVENT 04 -</div>
+   </div>
+   <div id="stamp" class="adminTab hidden">
+    <div class="label">MANUAL STAMP</div><div class="section-title">스탬프 수동 지급</div>
+    <div class="card"><label class="label">사번</label><input id="manualEmp" class="input" value="123456"><label class="label">행사</label>
+    <select id="manualEvent" class="input"><option>EVENT 01</option><option>EVENT 02</option><option>EVENT 03</option><option>EVENT 04</option></select>
+    <button class="primary" onclick="manualStamp()">스탬프 지급</button><div id="manualResult" class="alert hidden"></div></div>
+   </div>
+   <div id="logs" class="adminTab hidden">
+    <div class="label">QR LOG</div><div class="section-title">QR 인증 기록</div>
+    <div class="card"><table class="table"><tr><th>시간</th><th>사번</th><th>행사</th><th>QR</th><th>방식</th></tr>
+    <tr><td>09/17 13:21</td><td>123456</td><td>EVENT 03</td><td>QR03</td><td>QR</td></tr>
+    <tr><td>09/16 16:02</td><td>234567</td><td>EVENT 03</td><td>QR03</td><td>QR</td></tr>
+    <tr><td>09/15 12:44</td><td>345678</td><td>EVENT 02</td><td>QR02</td><td>QR</td></tr></table></div>
+   </div>
+   <div id="ranking" class="adminTab hidden">
+    <div class="label">RANKING</div><div class="section-title">현재 참여 랭킹</div>
+    <div class="card"><table class="table"><tr><th>순위</th><th>이름</th><th>사번</th><th>스탬프</th></tr>
+    <tr><td>1</td><td>김지현</td><td>123456</td><td id="rank1">3</td></tr><tr><td>2</td><td>이윤호</td><td>234567</td><td>9</td></tr><tr><td>3</td><td>박서연</td><td>345678</td><td>8</td></tr><tr><td>4</td><td>최민수</td><td>456789</td><td>7</td></tr></table></div>
+   </div>
+  </section>
+ </div>
+</main>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+let stamps = 3;
+function show(id){
+ document.querySelectorAll('main').forEach(x=>x.classList.add('hidden'));
+ document.getElementById(id).classList.remove('hidden');
+ window.scrollTo(0,0);
+ if(id==='employee') renderStamps();
+}
+function login(){
+ const n=document.getElementById('name').value||'김지현', e=document.getElementById('emp').value||'123456';
+ document.getElementById('userName').textContent=n; document.getElementById('userEmp').textContent=e;
+ show('employee');
+}
+function renderStamps(){
+ const box=document.getElementById('stamps'); box.innerHTML='';
+ for(let i=1;i<=10;i++){
+  const d=document.createElement('div'); d.className='stamp'+(i<=stamps?' done':'');
+  d.innerHTML=`<span>✈<br>STAMP ${String(i).padStart(2,'0')}</span>`;
+  box.appendChild(d);
+ }
+ document.getElementById('count').textContent=`${stamps} / 10`;
+ document.getElementById('progress').style.width=(stamps*10)+'%';
+ document.getElementById('rank1').textContent=stamps;
+ document.getElementById('searchCount').textContent=`${stamps} / 10`;
+ if(stamps>=10) setTimeout(()=>show('complete'),300);
+}
+function addStamp(n){
+ if(stamps<10) stamps++;
+ renderStamps();
+ document.getElementById('qrResult').classList.remove('hidden');
+ document.getElementById('eventStatus').textContent='참여 완료';
+ document.getElementById('recordStatus').textContent='완료';
+ document.getElementById('event4Count').textContent='843';
+ toast(`STAMP ${String(n).padStart(2,'0')} 적립 완료!`);
+}
+function previewPhoto(e){
+ const f=e.target.files[0]; if(!f)return;
+ const r=new FileReader(); r.onload=()=>document.getElementById('photo').innerHTML=`<img src="${r.result}">`; r.readAsDataURL(f);
+ toast('사진이 미리보기로 적용되었습니다.');
+}
+function spin(){
+ const w=document.getElementById('wheel'); w.style.transition='transform 2.2s ease-out'; w.style.transform=`rotate(${720+Math.floor(Math.random()*360)}deg)`;
+ setTimeout(()=>{document.getElementById('prize').classList.remove('hidden');document.getElementById('prize').textContent='🎁 축하합니다! 커피 기프티콘에 당첨되었습니다. (프로토타입)';},2300);
+}
+function adminTab(id,btn){
+ document.querySelectorAll('.adminTab').forEach(x=>x.classList.add('hidden')); document.getElementById(id).classList.remove('hidden');
+ document.querySelectorAll('.side button').forEach(x=>x.classList.remove('active')); btn.classList.add('active');
+}
+function searchUser(){toast('직원 정보를 조회했습니다.');}
+function manualStamp(){
+ if(stamps<10) stamps++;
+ document.getElementById('manualResult').classList.remove('hidden'); document.getElementById('manualResult').textContent='123456 사번 직원에게 스탬프 1개를 수동 지급했습니다.';
+ renderStamps(); toast('관리자 수동 스탬프 지급 완료');
+}
+function toast(t){const x=document.getElementById('toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',2200)}
+renderStamps();
+</script>
+</body>
+</html>
